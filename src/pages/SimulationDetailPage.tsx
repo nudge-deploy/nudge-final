@@ -13,7 +13,7 @@ export default function SimulationDetailPage() {
   const { userId } = useGetUser();
   const [modalPurchase, setModalPurchase] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
-  const [inputValue, setInputValue] = useState<number | ''>('');
+  const [inputValue, setInputValue] = useState<number>();
 
   // handle user purchase
   const handleUserPurchase = async ({ name_purchased, percentage_purchased } : UserPurchase) => {
@@ -38,7 +38,7 @@ export default function SimulationDetailPage() {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setInputValue(value ? parseInt(value) : ''); // Convert to number or keep as empty
+    setInputValue(parseInt(value)); // Convert to number or keep as empty
   };
 
   const [detailPageData, setDetailPageData] = useState<Pages>();
@@ -161,7 +161,7 @@ export default function SimulationDetailPage() {
             <button
               className="btn btn-primary text-slate-100"
               onClick={
-                () => handleUserPurchase({ user_id: userId, name_purchased: record.record_title, percentage_purchased: inputValue })
+                () => handleUserPurchase({ user_id: userId, name_purchased: record.record_title, percentage_purchased: inputValue! })
               }
             >
               Purchase
