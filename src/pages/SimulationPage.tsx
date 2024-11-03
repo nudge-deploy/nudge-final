@@ -43,9 +43,9 @@
     }
 
 
-    const [loadingBalance, setLoadingBalance] = useState(false);
+    // const [loadingBalance, setLoadingBalance] = useState(false);
     async function getResponseForBalance() {
-      setLoadingBalance(true);
+      // setLoadingBalance(true);
       const { data, error } = await supabase
         .from('user_responses')
         .select('*')
@@ -58,7 +58,7 @@
 
       if(data) {
         setBalance(data[0].response);
-        setLoadingBalance(false);
+        // setLoadingBalance(false);
       }
     }
 
