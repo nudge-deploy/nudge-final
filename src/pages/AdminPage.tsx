@@ -2,16 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { useGetUser } from "../hooks/useGetUser"
 import { useEffect, useState } from "react";
 import supabase from "../database/supabaseClient";
-import { UserResponse } from "../interface/SurveyInterface";
+// import { UserResponse } from "../interface/SurveyInterface";
 
 export default function AdminPage() {
   const { user } = useGetUser();
   const navigate = useNavigate();
   const [validate, setValidate] = useState(true);
 
-  const [allUsers, setAllUsers] = useState();
-
-  const [allUserResponses, setAllUserResponses] = useState<UserResponse[]>([]);
+  // const [allUserResponses, setAllUserResponses] = useState<UserResponse[]>([]);
 
   const validateAdmin = () => {
     if(user && user.email) {
@@ -34,7 +32,7 @@ export default function AdminPage() {
       }
       if(data) {
         console.log(data);
-        setAllUserResponses(data);
+        // setAllUserResponses(data);
       }
     } else {
       console.log('user not authorized');
@@ -64,7 +62,7 @@ export default function AdminPage() {
     fetchAllUsers();
   }, [validate])
   
-  console.log('all user responses: ', allUserResponses);
+  // console.log('all user responses: ', allUserResponses);
   
   if(validate == false) {
     return <div></div>
@@ -74,11 +72,7 @@ export default function AdminPage() {
       <div className="text-xl font-medium">
         Welcome, {user?.email}
       </div>
-        {
-          allUserResponses.map((userResponse) => (
-            <div>{userResponse.user_id} {userResponse.question_id} {userResponse.response}</div>
-          ))
-        }
+        
       <div className="">
         List of User Page Time Spent
       </div>

@@ -16,7 +16,6 @@ export interface Question {
 }
 
 export interface UserResponse {
-  user_id: string;
   question_id: string;
   response: string[];
 }
