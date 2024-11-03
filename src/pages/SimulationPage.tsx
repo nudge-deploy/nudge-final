@@ -13,7 +13,7 @@
     // const [loading, setLoading] = useState(false);
     const [balance, setBalance] = useState<string>();
     const [dummyBalance, setDummyBalance] = useState<number>();
-    const { userId } = useGetUser();
+    const { userId, email } = useGetUser();
     const questionId = "6d06b8b9-c3fa-4309-832c-222f3cb674db";
     const ruleBasedQuestionIds = [
       {
@@ -144,7 +144,7 @@
     
     const [records, setRecords] = useState<Records[]>([]);
     async function getRecords() {
-      setLoading(true);
+      // setLoading(true);
       const { data, error } = await supabase
         .from('records')
         .select('*')
@@ -155,7 +155,7 @@
       if(data) {
         console.log('response records: ', data);
         setRecords(data);
-        setLoading(false);
+        // setLoading(false);
       }
     }
 
@@ -235,7 +235,7 @@
       }
     }
 
-    const postTimeSpent = async ({ user_id, page_id, enter_time, exit_time } : UserPageVisits) => {
+    const postTimeSpent = async ({ user_id, user_email, page_id, page_name, enter_time, exit_time } : UserPageVisits) => {
       console.log('Page ID: ', page_id);
 
       const enterTimeDate = new Date(enter_time);
@@ -245,7 +245,9 @@
         .from('user_page_visits')
         .insert({
           user_id: user_id,
+          user_email: user_email,
           page_id: page_id,
+          page_name: page_name,
           enter_time: enterTimeDate,
           exit_time: exitTimeDate,
           // time_spent: time_spent,
@@ -356,9 +358,12 @@
         if(listPageData && listPageData.id) {
           if(timeSpent > 0.5) {
             console.log(`Time Spent on Simulation Page: ${timeSpent.toFixed(2)} seconds`)
+            console.log('USER EMAIL: ', email);
             postTimeSpent({
               user_id: userId,
+              user_email: email,
               page_id: listPageData.id,
+              page_name: listPageData.page_name,
               enter_time: startTimeRef.current,
               exit_time: leaveTime,
               time_spent: timeSpent
@@ -388,11 +393,12 @@
         </div>
         <div className="font-semibold text-xl text-slate-700">
           Saldo Anda: {
-            userPurchases ?
-            displayedBalance !== 0 ? formatCurrency(displayedBalance) : 'Calculating balance...'
+            userPurchases.length > 0 ?
+            displayedBalance !== 0 ? formatCurrency(displayedBalance)  : 'Calculating balance...'
             :
-            dummyBalance ? formatCurrency(dummyBalance) : 'Calculating balance...'
+            dummyBalance ? formatCurrency(dummyBalance)  : 'Calculating balance...'
           }
+          {'\n'}/ { formatCurrency(dummyBalance!) }
         </div>
         {/* <div className="px-3">
           <div className="font-medium">Your profile is</div>

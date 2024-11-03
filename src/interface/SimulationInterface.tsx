@@ -14,8 +14,11 @@ export interface Pages {
 
 export interface UserPageVisits {
   user_id: string;
+  user_email: string;
   page_id: string;
+  page_name: string;
   record_id?: string;
+  record_title?: string;
   enter_time: number;
   exit_time: number;
   time_spent: number;

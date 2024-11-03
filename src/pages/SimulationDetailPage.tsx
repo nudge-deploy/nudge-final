@@ -10,7 +10,7 @@ export default function SimulationDetailPage() {
   const recordProps = useLocation();
   const { ...record } = recordProps.state as Records 
   const navigate = useNavigate();
-  const { userId } = useGetUser();
+  const { userId, email } = useGetUser();
   const [modalPurchase, setModalPurchase] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [inputValue, setInputValue] = useState<number>();
@@ -57,7 +57,7 @@ export default function SimulationDetailPage() {
     }
   }
 
-  const postTimeSpent = async ({ user_id, page_id, record_id, enter_time, exit_time } : UserPageVisits) => {
+  const postTimeSpent = async ({ user_id, user_email, page_id, page_name, record_id, record_title, enter_time, exit_time } : UserPageVisits) => {
     console.log('Page ID: ', page_id);
 
     const enterTimeDate = new Date(enter_time);
@@ -67,8 +67,11 @@ export default function SimulationDetailPage() {
       .from('user_page_visits')
       .insert({
         user_id: user_id,
+        user_email: user_email,
         page_id: page_id,
+        page_name: page_name,
         record_id: record_id,
+        record_title: record_title,
         enter_time: enterTimeDate,
         exit_time: exitTimeDate,
         // time_spent: time_spent,
@@ -101,7 +104,10 @@ export default function SimulationDetailPage() {
           postTimeSpent({
             user_id: userId,
             page_id: detailPageData.id,
+            page_name: detailPageData.page_name,
+            user_email: email,
             record_id: record.id,
+            record_title: record.record_title,
             enter_time: startTimeRef.current,
             exit_time: leaveTime,
             time_spent: timeSpent
@@ -124,7 +130,7 @@ export default function SimulationDetailPage() {
       <div className="flex flex-row space-y-3 space-x-3 items-center">
         <div className="text-slate-700 font-medium">Tertarik membeli produk ini?</div>
         <button onClick={() => setModalPurchase(true)} className="btn btn-primary w-32 text-slate-100">Beli sekarang</button>
-        <button onClick={() => navigate('/simulation')} className="btn btn-shadow w-32 text-slate-100">Kembali</button>
+        <button onClick={() => navigate('/simulation')} className="btn btn-accent w-32 text-slate-100">Kembali</button>
       </div>    
       <Modal
         ariaHideApp={false}
