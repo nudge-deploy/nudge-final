@@ -23,6 +23,9 @@ export default function SurveyForms() {
   const [loading, setLoading] = useState(false);
   const [sebutkan, setSebutkan] = useState(false);
 
+  // single-select, sebutkan
+  const [singleSebutkan, setSingleSebutkan] = useState(false);
+
   // sebutkanAnswer mapped by question_id
   const [sebutkanAnswer, setSebutkanAnswer] = useState<{[key: string]: string}>({});
 
@@ -202,7 +205,7 @@ export default function SurveyForms() {
       setLoading(false);
     }
     if(error) {
-      console.log('error while fetch responses', error);
+      console.log('error while fetching responses', error);
     }
   }
   
@@ -384,7 +387,7 @@ export default function SurveyForms() {
                                       sebutkan ?
                                         <input 
                                           type="text" 
-                                          className="p-1"
+                                          className="p-1 border border-slate-600 bg-slate-100"
                                           value={sebutkanAnswer[question.id]}
                                           onChange={(e) => setSebutkanAnswer((prev) => ({ ...prev, [question.id]: e.target.value}))}
                                         />
@@ -400,14 +403,43 @@ export default function SurveyForms() {
                               </div>
                             </div>
                           ))
-                        :
+                      :
                         question.options.map((option, index) => (
-                          <div key={index} onClick={() => postSingleSelectAnswer({ question_id: question.id, response: [option] })} className="flex flex-row space-x-2 items-center">
+                          <div 
+                            key={index} 
+                            onClick={ 
+                              () => {
+                                postSingleSelectAnswer({ question_id: question.id, response: [option] });
+                                if(option.includes('sebutkan')) {
+                                  setSingleSebutkan(!singleSebutkan);
+                                }
+                              }
+                            } 
+                            className="flex flex-row space-x-2 items-center">
                             <button 
-                                // disabled={answered[question.id]} 
-                                className={`btn btn-circle btn-xs border-1 border-slate-800 ${selectedOption[question.id]?.includes(option) ? "bg-primary" : "bg-transparent"} ${answered[question.id] && "border-1 border-white"}`}>
-                              </button>
-                            <div>{option}</div>
+                              // disabled={answered[question.id]} 
+                              className={`btn btn-circle btn-xs border-1 border-slate-700 ${selectedOption[question.id]?.includes(option) ? "bg-primary" : "bg-transparent"} ${answered[question.id] && "border-1 border-white"}`}>
+                            </button>
+                            {
+                              option.includes('sebutkan') ?
+                                <div>
+                                  {
+                                    singleSebutkan ?
+                                      <input 
+                                        type="text" 
+                                        className="p-1 border border-slate-600 bg-slate-100"
+                                        // value={sebutkanAnswer[question.id]}
+                                        // onChange={(e) => setSebutkanAnswer((prev) => ({ ...prev, [question.id]: e.target.value}))}
+                                      />
+                                    :
+                                      "Produk keuangan lain (Harap sebutkan)"
+                                  }
+                                </div> 
+                              :
+                                <div>
+                                  {option}
+                                </div>
+                            }
                           </div>
                         ))
                     }
