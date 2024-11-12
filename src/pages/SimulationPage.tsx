@@ -371,7 +371,9 @@
           }
         }
       }
-    }, [startTimeRef, listPageData])
+    }, [startTimeRef, listPageData]);
+
+    const categories: string[] = ['Tabungan', 'Investasi', 'Kredit', 'Asuransi'];
     
     if(loading) {
       return (
@@ -382,7 +384,7 @@
     }
     return (
       <div className="p-3 flex flex-col space-y-3 bg-slate-100">
-        <div className="p-3 bg-info opacity-80 max-w-full">
+        <div className="mx-3 p-3 bg-info opacity-80 max-w-full">
           <div className="flex flex-col space-y-3">
             <div className="text-center font-medium text-white">Ini adalah sebuah simulasi</div>
             <div className="text-center font-light text-white">Bagaimana Anda mengelola uang Anda pada produk bank berikut ini.</div>
@@ -391,7 +393,7 @@
             </div>
           </div>
         </div>
-        <div className="font-semibold text-xl text-slate-700">
+        <div className="px-3 font-semibold text-xl text-slate-700">
           Saldo Anda: {
             userPurchases.length > 0 ?
             displayedBalance !== 0 ? formatCurrency(displayedBalance)  : 'Calculating balance...'
@@ -415,7 +417,7 @@
         {/* <div>
           {rekomendasi.length > 0 && rekomendasi}
         </div> */}
-        <div className="text-xl text-slate-700 font-medium max-tablet:text-center max-mobile:text-center">Anda sudah membeli</div>
+        <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">Anda sudah membeli</div>
         <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center ">
           {
             userPurchases.length > 0 ?
@@ -429,30 +431,40 @@
               <div className="flex text-slate-700 justify-center p-3">Belum ada pembelian</div>
           }  
         </div>
-        <div className="text-xl text-slate-700 font-medium max-tablet:text-center max-mobile:text-center">Rekomendasi untuk Anda</div>
+        <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">Rekomendasi untuk Anda</div>
         <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center">
           {
             records && 
             records.length > 0 &&
             records
-              .filter((record) => record.record_name.includes(rekomendasi))
+              .filter((record) => record.record_title.includes(rekomendasi))
               .map((record, index) => (
               <RecordCard key={index} {...record}/>
             ))
           }
         </div>
-        <div className="text-xl text-slate-700 font-medium max-tablet:text-center max-mobile:text-center">Produk terkait</div>
-        <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center">
-          {
-            records && 
-            records.length > 0 &&
-            records
-              .filter((record) => !record.record_name.includes(rekomendasi))
-              .map((record, index) => (
-              <RelatedRecordCard key={index} {...record}/>
-            ))
-          }
-        </div>
+        <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">Produk terkait</div>
+        {
+          categories
+            .filter((category) => !category.includes(rekomendasi))
+            .map((category) => (
+            <>
+              <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">{category}</div>
+              <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center">
+                {
+                  records && 
+                  records.length > 0 &&
+                  records
+                    .filter((record) => !record.record_name.includes(rekomendasi) && record.record_name.includes(category))
+                    .map((record, index) => (
+                    <RelatedRecordCard key={index} {...record}/>
+                  ))
+                }
+              </div>
+            </>
+
+          ))
+        }
         <div className="flex justify-center">
           <button onClick={() => setFinishSimulationModal(true)} className="btn btn-primary text-slate-100 w-1/4 text-center font-medium">Finish Simulation?</button>
         </div>

@@ -322,7 +322,7 @@ export default function SurveyForms() {
   
   if(loading) {
     return (
-      <div className="h-screen flex justify-center items-center">
+      <div className="h-screen flex justify-center items-center bg-slate-100">
         <span className="loading loading-spinner"></span>
       </div>
     )

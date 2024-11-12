@@ -1,6 +1,7 @@
 export interface Records {
   id: string;
   page_id: string;
+  category_id: number;
   record_name: string;
   record_title: string;
   record_code: string;

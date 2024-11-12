@@ -9,6 +9,11 @@ export default {
       'mobile': '600px',
       'tablet': '800px',
       'laptop': '1000px'
+    },
+    extend: {
+      fontFamily: {
+        sans: ['Poppins', 'sans-serif'], // or 'Lato', 'sans-serif'
+      }
     }
   },
   screens: {
