@@ -1,7 +1,7 @@
 import supabase from "../database/supabaseClient"
 import { Link, useNavigate } from "react-router-dom";
 import { useGetUser } from "../hooks/useGetUser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function SurveyHome() {
   
@@ -19,32 +19,64 @@ export default function SurveyHome() {
     }
   }
 
-    async function checkUserFinishSurvey() {
-      if(userId) {
-        const { data, error } = await supabase
-          .from('user_finish_surveys')
-          .select('*')
-          .eq('user_id', userId)
-        
-        if(error) {
-          console.log('error while checking user finish survey: ', error);
-        }
-        if(data) {
-          console.log('successful checking user finish survey: ', data);
-          if(data.length > 0) {
-            navigate('/simulation')
-          } else {
-            console.log('user hasnt finished the survey', userId);
-          }
+  const [startSimulation, setStartSimulation] = useState(false);
+  const handleUserStartSimulation = async () => {
+    console.log('handle user start simul SURVEYHOME');
+    if(userId) {
+      setStartSimulation(true);
+      const { data, error } = await supabase
+        .from('user_finish_simulations')
+        .insert({
+          user_id: userId,
+          finished_simulation: false,
+        });
+      console.log('USER ID EXISTS.');
+      if(error) {
+        console.log('error while starting simulation SURVEYHOME', error)
+      } else if(data) {
+        console.log('SURVEYHOME user start simulation!! finished_simulation FALSE');
+      }
+    } else {
+      console.log('user id doesnt exist');
+    }
+  }
+
+  async function checkUserFinishSurvey() {
+    if(userId) {
+      const { data, error } = await supabase
+        .from('user_finish_surveys')
+        .select('*')
+        .eq('user_id', userId)
+      
+      if(error) {
+        console.log('error while checking user finish survey SURVEYHOME: ', error);
+      }
+      if(data) {
+        console.log('successful checking user finish survey SURVEYHOME: ', data);
+        if(data.length > 0) {
+          console.log('panggil start simul');
+          handleUserStartSimulation();
+        } else {
+          console.log('user hasnt finished the survey', userId);
         }
       }
     }
+  }
 
   useEffect(() => {
     if(userId) {
       checkUserFinishSurvey();
     }
-  }, [userId])
+  }, [userId]);
+
+  useEffect(() => {
+    if(startSimulation) {
+      console.log('start simulation!!');
+      navigate('/simulation');
+    } else {
+      console.log('simulation not started!!');
+    }
+  }, [startSimulation, navigate])
   
 
   if(!user) {

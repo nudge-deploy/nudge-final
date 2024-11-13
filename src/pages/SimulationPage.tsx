@@ -7,6 +7,7 @@
   import { useNavigate } from "react-router-dom";
   import { modalStyles } from "./SimulationDetailPage";
   import Modal from 'react-modal';
+import { useGetSimulation } from "../hooks/useGetSimulation";
 
   export default function SimulationPage() {
 
@@ -14,6 +15,8 @@
     const [balance, setBalance] = useState<string>();
     const [dummyBalance, setDummyBalance] = useState<number>();
     const { userId, email } = useGetUser();
+    const { simulationId } = useGetSimulation();
+    // console.log('SIMULATION ID ON SIMUL PAGE: ', simulationId);
     const questionId = "6d06b8b9-c3fa-4309-832c-222f3cb674db";
     const ruleBasedQuestionIds = [
       {
@@ -235,7 +238,7 @@
       }
     }
 
-    const postTimeSpent = async ({ user_id, user_email, page_id, page_name, enter_time, exit_time } : UserPageVisits) => {
+    const postTimeSpent = async ({ simulation_id, user_id, user_email, page_id, page_name, enter_time, exit_time } : UserPageVisits) => {
       console.log('Page ID: ', page_id);
 
       const enterTimeDate = new Date(enter_time);
@@ -250,6 +253,7 @@
           page_name: page_name,
           enter_time: enterTimeDate,
           exit_time: exitTimeDate,
+          simulation_id: simulation_id,
           // time_spent: time_spent,
         });
       
@@ -312,24 +316,24 @@
     const [loading, setLoading] = useState(false);
     async function handleFinishSimulation(finishSimulation: boolean, phoneNumber: string) {
       setLoading(true);
-      console.log('MASUK handle finish sim')
+      console.log('MASUK handle finish sim', simulationId);
       const { error } = await supabase
         .from('user_finish_simulations')
-        .insert({
-          user_id: userId,
+        .update({
           finished_simulation: finishSimulation,
           phone_number: phoneNumber
         })
+        .eq('id', simulationId)
 
       if(error) {
-        console.log('error while posting finish simulation: ', error.message);
+        console.log('error while posting finish simulation SIMULPAGE: ', error.message);
         if(error.message.includes('duplicate')) {
           setLoading(false);
           userSignOut();
           setFinishSimulationModal(false);
         }
       } else {
-        console.log('MASUK handle success');
+        console.log('MASUK handle UPDATE success');
         userSignOut();
         setFinishSimulationModal(false);
         setLoading(false);
@@ -355,7 +359,7 @@
         const leaveTime = Date.now();
         const timeSpent = (leaveTime - startTimeRef.current) / 1000;
 
-        if(listPageData && listPageData.id) {
+        if(simulationId && listPageData && listPageData.id) {
           if(timeSpent > 0.5) {
             console.log(`Time Spent on Simulation Page: ${timeSpent.toFixed(2)} seconds`)
             console.log('USER EMAIL: ', email);
@@ -366,12 +370,15 @@
               page_name: listPageData.page_name,
               enter_time: startTimeRef.current,
               exit_time: leaveTime,
-              time_spent: timeSpent
+              time_spent: timeSpent,
+              simulation_id: simulationId
             })
           }
+        } else {
+          console.log('simulation id doesnt exist: ');
         }
       }
-    }, [startTimeRef, listPageData]);
+    }, [startTimeRef, listPageData, simulationId]);
 
     const categories: string[] = ['Tabungan', 'Investasi', 'Kredit', 'Asuransi'];
     

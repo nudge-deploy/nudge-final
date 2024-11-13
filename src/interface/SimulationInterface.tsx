@@ -23,6 +23,7 @@ export interface UserPageVisits {
   enter_time: number;
   exit_time: number;
   time_spent: number;
+  simulation_id: string;
 }
 
 export interface UserPurchase {

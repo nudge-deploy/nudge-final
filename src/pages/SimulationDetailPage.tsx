@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import supabase from "../database/supabaseClient";
 import { useGetUser } from "../hooks/useGetUser";
 import Modal from 'react-modal';
+import { useGetSimulation } from "../hooks/useGetSimulation";
 
 export default function SimulationDetailPage() {
 
@@ -11,6 +12,8 @@ export default function SimulationDetailPage() {
   const { ...record } = recordProps.state as Records 
   const navigate = useNavigate();
   const { userId, email } = useGetUser();
+  const { simulationId } = useGetSimulation();
+  console.log('simul id on detail: ', simulationId);
   const [modalPurchase, setModalPurchase] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [inputValue, setInputValue] = useState<number>();
@@ -24,7 +27,8 @@ export default function SimulationDetailPage() {
       .insert({
         user_id: userId,
         name_purchased: name_purchased,
-        percentage_purchased: percentage_purchased
+        percentage_purchased: percentage_purchased,
+        simulation_id: simulationId,
       });
     
     if(error) {
@@ -57,7 +61,7 @@ export default function SimulationDetailPage() {
     }
   }
 
-  const postTimeSpent = async ({ user_id, user_email, page_id, page_name, record_id, record_title, enter_time, exit_time } : UserPageVisits) => {
+  const postTimeSpent = async ({ simulation_id, user_id, user_email, page_id, page_name, record_id, record_title, enter_time, exit_time } : UserPageVisits) => {
     console.log('Page ID: ', page_id);
 
     const enterTimeDate = new Date(enter_time);
@@ -74,6 +78,7 @@ export default function SimulationDetailPage() {
         record_title: record_title,
         enter_time: enterTimeDate,
         exit_time: exitTimeDate,
+        simulation_id: simulation_id
         // time_spent: time_spent,
       });
     
@@ -96,7 +101,7 @@ export default function SimulationDetailPage() {
     return () => {
       const leaveTime = Date.now();
       const timeSpent = (leaveTime - startTimeRef.current) / 1000;
-      if(detailPageData && detailPageData.id) {
+      if(simulationId && detailPageData && detailPageData.id) {
         if(timeSpent > 0.5) {
           console.log('Start time: ', typeof startTimeRef.current, 'Leave time: ', typeof leaveTime);
           console.log(`Time Spent on Detail Page with Record ${record.record_title}: ${timeSpent.toFixed(2)} seconds`)
@@ -110,12 +115,15 @@ export default function SimulationDetailPage() {
             record_title: record.record_title,
             enter_time: startTimeRef.current,
             exit_time: leaveTime,
-            time_spent: timeSpent
+            time_spent: timeSpent,
+            simulation_id: simulationId
           })
         }
+      } else {
+        console.log('simulation id doesnt exist: ');
       }
     }
-  }, [startTimeRef, detailPageData])
+  }, [startTimeRef, detailPageData, simulationId])
 
   return (
     <div className="p-3 flex flex-col w-full space-y-3 max-tablet:justify-center max-tablet:h-screen max-mobile:justify-center max-mobile:h-screen bg-slate-100 h-screen justify-center">

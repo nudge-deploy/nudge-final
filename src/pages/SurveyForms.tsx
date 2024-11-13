@@ -293,6 +293,26 @@ export default function SurveyForms() {
     }
   }
 
+  const handleUserStartSimulation = async () => {
+    if(userId) {
+
+      const { data, error } = await supabase
+        .from('user_finish_simulations')
+        .insert({
+          user_id: userId,
+          finished_simulation: false,
+        });
+      
+      if(error) {
+        console.log('error while starting simulation SURVEYFORMS', error)
+      }
+      if(data) {
+        console.log('user start simulation!! finished_simulation FALSE');
+      }
+
+    }
+  }
+
   useEffect(() => {
     fetchQuestions();
     fetchSurveyTypes();
@@ -457,17 +477,27 @@ export default function SurveyForms() {
           {
             surveyTypes.map((type, idx) => (
               <div key={type.id} className={`w-5 h-2 rounded-full border-2 ${
-                idx <= index ? 'bg-slate-700' : ''
-              } border-slate-700`}></div>
+                idx <= index ? 'bg-slate-600' : ''
+              } border-slate-600`}></div>
             ))
           }
         </div>
         {/* <div>{index+1} of {surveyTypes.length-1}</div> */}
       </div>
       <div className="flex flex-col space-y-2 mt-3">
-        {index === surveyTypes.length - 1 && <Link to='/simulation' onClick={() => handleUserFinishSurvey(true)} className="btn btn-primary text-sm text-slate-100 font-bold">Submit. Go to simulation</Link>}
+        {
+          index === surveyTypes.length - 1 && 
+          <Link 
+            to='/simulation' 
+            onClick={() => {
+              handleUserFinishSurvey(true);
+              handleUserStartSimulation();
+            }} 
+            className="btn btn-primary text-sm text-slate-100 font-bold">
+              Submit. Go to simulation
+          </Link>}
         <div className="flex flex-row p-3 space-x-2">
-          <button disabled={index == 0 && true} onClick={handlePrevious} className="btn btn-secondary text-slate-100 text-sm font-bold">Previous</button>
+          <button disabled={index == 0 && true} onClick={handlePrevious} className="btn btn-accent text-slate-100 text-sm font-bold">Previous</button>
           <button disabled={index == surveyTypes.length - 1 && true} onClick={handleNext} className="btn btn-primary text-slate-100 text-sm font-bold">Next</button>
         </div>
       </div>
