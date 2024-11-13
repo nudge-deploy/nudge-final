@@ -255,6 +255,7 @@ export default function SurveyForms() {
       setIndex(index + 1);
       setCurrentSurveyType(surveyTypes[index].type_name);
       scrollToTop();
+      console.log('handle next')
     }
   }
 
@@ -267,7 +268,9 @@ export default function SurveyForms() {
   }
 
   const scrollToTop = () => {
+    console.log('scrolled to top 1')
     if (scrollRef.current) {
+      console.log('scrolled to top 2')
       scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
@@ -329,8 +332,8 @@ export default function SurveyForms() {
   }
   return (
     <div className="flex flex-col justify-center items-center p-3 bg-slate-100 text-slate-800 min-h-screen">
-      <div ref={scrollRef} className="border border-1 p-4 w-1/2 max-mobile:w-full max-tablet:w-full">
-        <div className="text-xl font-medium">{currentSurveyType}</div>
+      <div className="border border-1 p-4 w-1/2 max-mobile:w-full max-tablet:w-full">
+        <div ref={scrollRef} className="text-xl font-bold">{currentSurveyType}</div>
         <div className="flex flex-col overflow-auto">
           {
             questions
@@ -339,7 +342,7 @@ export default function SurveyForms() {
                 return (
                   <div key={question.id} className="flex flex-col space-y-2 mt-4">
                     <div className="flex flex-row items-start space-x-2">
-                      <div className="text-base font-medium">{question.question_text}</div>
+                      <div className="text-base font-bold">{question.question_text}</div>
                       {
                         answered[question.id] ?
                         <div onClick={() => handleChangeAnswer(question.id)} className="btn bg-slate-100 btn-sm text-xs text-slate-800 font-light">Change Answer</div>
@@ -449,12 +452,24 @@ export default function SurveyForms() {
           }
         </div>
       </div>
-      <div className="flex flex-col space-y-2 mt-3">
-        <div className="flex flex-row p-3 space-x-2">
-          <button disabled={index == 0 && true} onClick={handlePrevious} className="btn btn-secondary text-slate-100 text-sm font-medium">Previous</button>
-          <button disabled={index == surveyTypes.length - 1 && true} onClick={handleNext} className="btn btn-primary text-slate-100 text-sm font-medium">Next</button>
+      <div className="flex flex-col justify-center items-center space-y-3 mt-3">
+        <div className="flex flex-row space-x-1">
+          {
+            surveyTypes.map((type, idx) => (
+              <div key={type.id} className={`w-5 h-2 rounded-full border-2 ${
+                idx <= index ? 'bg-slate-700' : ''
+              } border-slate-700`}></div>
+            ))
+          }
         </div>
-        {index === surveyTypes.length - 1 && <Link to='/simulation' onClick={() => handleUserFinishSurvey(true)} className="btn btn-primary text-sm text-slate-100 font-medium">Submit. Go to simulation</Link>}
+        {/* <div>{index+1} of {surveyTypes.length-1}</div> */}
+      </div>
+      <div className="flex flex-col space-y-2 mt-3">
+        {index === surveyTypes.length - 1 && <Link to='/simulation' onClick={() => handleUserFinishSurvey(true)} className="btn btn-primary text-sm text-slate-100 font-bold">Submit. Go to simulation</Link>}
+        <div className="flex flex-row p-3 space-x-2">
+          <button disabled={index == 0 && true} onClick={handlePrevious} className="btn btn-secondary text-slate-100 text-sm font-bold">Previous</button>
+          <button disabled={index == surveyTypes.length - 1 && true} onClick={handleNext} className="btn btn-primary text-slate-100 text-sm font-bold">Next</button>
+        </div>
       </div>
     </div>
   )

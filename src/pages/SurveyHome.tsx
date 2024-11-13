@@ -59,7 +59,7 @@ export default function SurveyHome() {
   }
   return (
     <div className="p-3 bg-slate-100 h-screen flex flex-col space-y-3 justify-center items-center max-mobile:justify-center max-tablet:justify-center">
-      <div className="text-slate-700 text-center text-xl font-medium">
+      <div className="text-slate-700 text-center text-xl font-bold">
         Welcome, {user?.email}
       </div>
       <div className="text-center text-base text-slate-700">

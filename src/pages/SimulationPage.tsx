@@ -466,7 +466,7 @@
           ))
         }
         <div className="flex justify-center">
-          <button onClick={() => setFinishSimulationModal(true)} className="btn btn-primary text-slate-100 w-1/4 text-center font-medium">Finish Simulation?</button>
+          <button onClick={() => setFinishSimulationModal(true)} className="btn btn-primary text-slate-100 w-1/4 text-center font-bold">Finish Simulation?</button>
         </div>
         <Modal
           ariaHideApp={false}
