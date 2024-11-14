@@ -12,7 +12,6 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
   export default function SimulationPage() {
 
     // const [loading, setLoading] = useState(false);
-   
     const { userId, email } = useGetUser();
     const { simulationId } = useGetSimulation();
     // console.log('SIMULATION ID ON SIMUL PAGE: ', simulationId);
@@ -24,9 +23,12 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       {
         rule_based_id: '1f2603b2-54b5-4dcb-8bc3-137333d84a96',
       },  
-      // {
-      //   rule_based_id: '88f674b0-a723-4311-9d60-b9afa32c415e' // outside psychography behavior
-      // }
+      {
+        rule_based_id: "9ee2d8c6-fd27-411e-bc5d-322f2234ff2b" // Apakah anda punya rumah
+      },
+      {
+        rule_based_id: "755352f3-2b62-46cc-ac72-6476ce5e5d12" // Seberapa sering Anda melakukan perjalanan (domestik atau internasional)?
+      },
     ]
     const [ruleBasedResponses, setRuleBasedResponses] = useState<string[]>([]);
     // for fetch rulebased, avoid double calls
@@ -44,13 +46,11 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       }).format(value);
     }
 
-
-    
     // Rule-based Function determining one of three results
     // "Keamanan atau Likuiditas Tinggi" -> "Tabungan atau Deposito"
     // "Toleransi resiko tinggi, minat invest tinggi" -> "Saham atau Reksadana"
     // "Produk dengan manfaat pajak or selain two above" -> "Obligasi Pemerintah"
-    const [rekomendasi, setRekomendasi] = useState(""); // can be "Tabungan", "Deposito", "Saham" (v), "Reksa Dana" (v), "Obligasi"
+    const [rekomendasi, setRekomendasi] = useState([""]); // can be "Tabungan", "Deposito", "Saham" (v), "Reksa Dana" (v), "Obligasi"
     function getRulebasedRecommendation() { 
       let responses: string[] = [];
       if(ruleBasedResponses && ruleBasedResponses.length > 0) {
@@ -65,63 +65,171 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         // console.log('Array of rulebased responses: ', responses);
 
         // Rule-based Conditions below
-        if(
-          // All the conditions that outputs 'Saham'
+        if (
+          // Conditions that output 'Saham', 'Rumah' and 'Kartu'
           (
-            responses.includes('Meningkatkan kekayaan dengan cepat') && responses.includes('Risiko tinggi, imbalan tinggi')
-          ) ||
-          (
-            responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Stabilitas keuangan jangka panjang')
-          ) ||
-          (
-            responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')
-          ) ||
-          (
-            responses.includes('Risiko moderat') && responses.includes('Meningkatkan kekayaan dengan cepat')
-          )
+            (responses.includes('Meningkatkan kekayaan dengan cepat') && responses.includes('Risiko tinggi, imbalan tinggi')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Meningkatkan kekayaan dengan cepat'))
+          ) &&
+          (responses.includes('Setiap bulan') && (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga')))
         ) {
-          setRekomendasi('Saham');
-        } else if(
-          // All the conditions that outputs 'Reksadana'
+          setRekomendasi(['Saham', 'Rumah', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Saham' and 'Rumah'
           (
-            responses.includes('Risiko moderat') && responses.includes('Stabilitas keuangan jangka panjang')
-          ) ||
-          (
-            responses.includes('Risiko moderat') && responses.includes('Keamanan dan menghindari risiko')
-          ) ||
-          (
-            responses.includes('Risiko moderat') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')
-          )
+            (responses.includes('Meningkatkan kekayaan dengan cepat') && responses.includes('Risiko tinggi, imbalan tinggi')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Meningkatkan kekayaan dengan cepat'))
+          ) &&
+          (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga'))
         ) {
-          setRekomendasi('Reksa Dana');
-        } else if(
-          // All the conditions that outputs 'Obligasi'
+          setRekomendasi(['Saham', 'Rumah']);
+        } 
+        else if (
+          // Conditions that output 'Saham' and 'Kartu'
           (
-            responses.includes('Risiko rendah, pertumbuhan stabil') && responses.includes('Stabilitas keuangan jangka panjang')
-          ) ||
-          (
-            responses.includes('Risiko rendah, pertumbuhan stabil') && responses.includes('Keamanan dan menghindari risiko')
-          ) ||
-          (
-            responses.includes('Risiko rendah, pertumbuhan stabil') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')
-          )
+            (responses.includes('Meningkatkan kekayaan dengan cepat') && responses.includes('Risiko tinggi, imbalan tinggi')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Meningkatkan kekayaan dengan cepat'))
+          ) &&
+          responses.includes('Setiap bulan')
         ) {
-          setRekomendasi('Obligasi');
-        } else if(
-          // All the conditions that outputs 'Tabungan' or 'Deposito'
+          console.log('Saham, Rumah, Kartu? ', responses.includes('Tinggal dengan keluarga'));
+          setRekomendasi(['Saham', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Saham' only
           (
-            responses.includes('Menghindari risiko') && responses.includes('Stabilitas keuangan jangka panjang')
-          ) ||
-          (
-            responses.includes('Menghindari risiko') && responses.includes('Keamanan dan menghindari risiko')
-          ) ||
-          (
-            responses.includes('Menghindari risiko') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')
-          )
+            (responses.includes('Meningkatkan kekayaan dengan cepat') && responses.includes('Risiko tinggi, imbalan tinggi')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko tinggi, imbalan tinggi') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Meningkatkan kekayaan dengan cepat'))
+          ) &&
+          !responses.includes('Tidak, saya menyewa') &&
+          !responses.includes('Tinggal dengan keluarga')
         ) {
-          setRekomendasi('Deposito'); // add Tabungan as an alternative
-        } else {
-          setRekomendasi('Tabungan');
+          setRekomendasi(['Saham']);
+        } 
+        // banyak dulu, ke sedikit
+        else if (
+          // Conditions that output 'Reksadana', 'Rumah' and 'Kartu'
+          (
+            (responses.includes('Risiko moderat') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Keamanan dan menghindari risiko')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas'))
+          ) &&
+          (responses.includes('Setiap bulan') && (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga')))
+        ) {
+          setRekomendasi(['Reksadana', 'Rumah', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Reksadana' and 'Rumah'
+          (
+            (responses.includes('Risiko moderat') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Keamanan dan menghindari risiko')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas'))
+          ) &&
+          (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga'))
+        ) {
+          setRekomendasi(['Reksadana', 'Rumah']);
+        } 
+        else if (
+          // Conditions that output 'Reksadana' and 'Kartu'
+          (
+            (responses.includes('Risiko moderat') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Keamanan dan menghindari risiko')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas'))
+          ) &&
+          responses.includes('Setiap bulan')
+        ) {
+          setRekomendasi(['Reksadana', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Reksadana' only
+          (
+            (responses.includes('Risiko moderat') && responses.includes('Stabilitas keuangan jangka panjang')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Keamanan dan menghindari risiko')) ||
+            (responses.includes('Risiko moderat') && responses.includes('Menyeimbangkan pertumbuhan dengan stabilitas'))
+          ) &&
+          !responses.includes('Tidak, saya menyewa') &&
+          !responses.includes('Tinggal dengan keluarga')
+        ) {
+          setRekomendasi(['Reksadana']);
+        } 
+
+        // Deposito, Rumah, Kartu
+        else if (
+          // Conditions that output 'Deposito', 'Rumah' and 'Kartu'
+          (
+            responses.includes('Risiko rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          (responses.includes('Setiap bulan') && (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga')))
+        ) {
+          setRekomendasi(['Deposito', 'Rumah', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Deposito' and 'Rumah'
+          (
+            responses.includes('Risiko rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga'))
+        ) {
+          setRekomendasi(['Deposito', 'Rumah']);
+        } 
+        else if (
+          // Conditions that output 'Deposito' and 'Kartu'
+          (
+            responses.includes('Risiko rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          responses.includes('Setiap bulan')
+        ) {
+          setRekomendasi(['Deposito', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Deposito' only
+          (
+            responses.includes('Risiko rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          !responses.includes('Tidak, saya menyewa') &&
+          !responses.includes('Tinggal dengan keluarga')
+        ) {
+          setRekomendasi(['Deposito']);
+        } 
+        else if (
+          // Conditions that output 'Tabungan', 'Rumah' and 'Kartu'
+          (
+            responses.includes('Risiko sangat rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          (responses.includes('Setiap bulan') && (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga')))
+        ) {
+          setRekomendasi(['Tabungan', 'Rumah', 'Kartu']);
+        } 
+        else if (
+          // Conditions that output 'Tabungan' and 'Rumah'
+          (
+            responses.includes('Risiko sangat rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga'))
+        ) {
+          setRekomendasi(['Tabungan', 'Rumah']);
+        } 
+        else if (
+          // Conditions that output 'Tabungan' and 'Kartu'
+          (
+            responses.includes('Risiko sangat rendah') && responses.includes('Keamanan dan menghindari risiko')
+          ) &&
+          responses.includes('Setiap bulan')
+        ) {
+          setRekomendasi(['Tabungan', 'Kartu']);
+        } 
+        else {
+          // Default if no conditions match
+          setRekomendasi(['Tabungan']);
         }
       }
     }
@@ -155,7 +263,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         console.log('error while fetching response balance', error);
       }
 
-      if(data) {
+      if(data && data[0] && data[0].response) {
         // console.log('question id: ', data[0].question_id, 'data rule base: ', data[0].response);
         setRuleBasedResponses((prevItem) => [...prevItem, data[0].response]);
       }
@@ -442,7 +550,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       <div className="p-3 flex flex-col space-y-3 bg-slate-100">
         <div className="mx-3 p-3 bg-info opacity-80 max-w-full">
           <div className="flex flex-col space-y-3">
-            <div className="text-center font-medium text-white">Ini adalah sebuah simulasi</div>
+            <div className="text-center font-bold text-white">Ini adalah sebuah simulasi</div>
             <div className="text-center font-light text-white">Bagaimana Anda mengelola uang Anda pada produk bank berikut ini.</div>
             <div className="text-center font-light text-white italic">
               Disclaimer: Saldo ini merupakan simulasi yang dihitung berdasarkan 24 kali total maksimum rentang pendapatan Anda. Jika tidak ada data pendapatan yang diinput, saldo akan diatur secara default ke Rp1.000.000.000.
@@ -517,8 +625,6 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
                     </div>
                   </Modal>
                 </div>
-
-                // modal jual kembali
                 
 
               ))
@@ -532,7 +638,9 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
             records && 
             records.length > 0 &&
             records
-              .filter((record) => record.record_title.includes(rekomendasi))
+              .filter((record) =>
+                rekomendasi.some((keyword) => record.record_title.includes(keyword))
+              )
               .map((record, index) => (
               <RecordCard key={index} {...record}/>
             ))
@@ -541,7 +649,9 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">Produk terkait</div>
         {
           categories
-            .filter((category) => !category.includes(rekomendasi))
+            .filter((category) =>
+              !rekomendasi.some((keyword) => category.includes(keyword))
+            )
             .map((category) => (
             <>
               <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">{category}</div>
@@ -550,7 +660,10 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
                   records && 
                   records.length > 0 &&
                   records
-                    .filter((record) => !record.record_name.includes(rekomendasi) && record.record_name.includes(category))
+                    .filter(
+                      (record) => 
+                        !rekomendasi.some((keyword) => record.record_title.includes(keyword))
+                      && record.record_name.includes(category))
                     .map((record, index) => (
                     <RelatedRecordCard key={index} {...record}/>
                   ))
