@@ -233,6 +233,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
 
     const [userPurchases, setUserPurchases] = useState<UserPurchase[]>([]);
     async function fetchUserPurchase() {
+      setLoading(true);
       const { data, error } = await supabase
         .from('user_purchases')
         .select('*')
@@ -244,6 +245,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       if(data) {
         console.log('data user purchases: ', data);
         setUserPurchases(data);
+        setLoading(false);
       }
     }
 
@@ -282,6 +284,29 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     
     
     // END PART 2: UPDATE BALANCE AFTER USER PURCHASE
+
+    // START PART 3: USER RESELL
+    const [resellModal, setResellModal] = useState(false);
+    const handleUserJualKembali = async ({ ...purchased } : UserPurchase) => {
+      setLoading(true);
+      const response = await supabase
+        .from('user_purchases')
+        .delete()
+        .eq('simulation_id', simulationId)
+        .eq('name_purchased', purchased.name_purchased);
+      
+      if(response) {
+        console.log('SUCCESS jual kembali', response);
+        setLoading(false);
+        setResellModal(false);
+        fetchUserPurchase();
+      } else {
+        console.log('gagal jual kembali');
+      }
+
+    }
+
+    // END PART 3: USER RESELL  
 
     
     const [listPageData, setListPageData] = useState<Pages>();
@@ -450,10 +475,52 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           {
             userPurchases.length > 0 ?
               userPurchases.map((purchased) => (
-                <div className="relative p-3 m-3 bg-primary w-36 h-36 rounded-xl hover:scale-105 transition">
+                <div className="relative p-3 m-3 bg-primary w-36 h-44 rounded-xl hover:scale-105 transition">
                   <div className="text-white text-base font-semibold">{purchased.name_purchased}</div>
-                  <div className="absolute bottom-3 right-3 text-white text-3xl font-bold">{purchased.percentage_purchased}%</div>
+                  <div className="absolute bottom-13 right-3 text-white text-3xl font-bold">{purchased.percentage_purchased}%</div>
+                  <div onClick={() => setResellModal(true)} className="bg-slate-100 px-2 py-1 rounded-md absolute left-3 bottom-3 text-primary text-sm font-bold hover:scale-105 transition" >Jual kembali</div>
+                  <Modal
+                    ariaHideApp={false}
+                    isOpen={resellModal}
+                    onRequestClose={() => {
+                      setResellModal(false);
+                    }}
+                    style={modalStyles}
+                  >
+                    <div className="bg-slate-100 rounded-lg shadow-lg p-6 max-w-md mx-auto space-y-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-4 border-b">
+                        <h2 className="text-lg font-semibold text-gray-700">Jual kembali {purchased.name_purchased}</h2>
+                        <button
+                          onClick={() => setResellModal(false)}
+                          className="btn btn-circle btn-ghost text-gray-600"
+                        >
+                          ✕
+                        </button>
+                      </div>
+
+                      <div className="text-gray-700">Yakin ingin menjual kembali produk {purchased.name_purchased} sebanyak {purchased.percentage_purchased}%?</div>
+                      <div className="flex justify-end space-x-2 pt-4">
+                        <button
+                          className="btn btn-secondary text-slate-100"
+                          onClick={() => setResellModal(false)}
+                        >
+                          Batal
+                        </button>
+                        <button
+                          className="btn btn-primary text-slate-100"
+                          onClick={() => handleUserJualKembali({ ...purchased })}
+                        >
+                          Ya, saya yakin
+                        </button>
+                      </div>
+                    </div>
+                  </Modal>
                 </div>
+
+                // modal jual kembali
+                
+
               ))
             :
               <div className="flex text-slate-700 justify-center p-3">Belum ada pembelian</div>

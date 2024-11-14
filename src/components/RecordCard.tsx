@@ -20,7 +20,7 @@ export default function RecordCard({ ...recordCard} : Records) {
               recordCard.record_description.indexOf('!') !== -1 ? recordCard.record_description.indexOf('!') : recordCard.record_description.length
             )
           )
-        }
+        }...
       </div>
       <Link to={`/detail-page/${recordCard.id}`} state={recordCard} className='absolute bottom-3 text-sm underline text-white font-light'>More details</Link>
     </div>
