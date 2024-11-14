@@ -12,8 +12,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
   export default function SimulationPage() {
 
     // const [loading, setLoading] = useState(false);
-    const [balance, setBalance] = useState<string>();
-    const [dummyBalance, setDummyBalance] = useState<number>();
+   
     const { userId, email } = useGetUser();
     const { simulationId } = useGetSimulation();
     // console.log('SIMULATION ID ON SIMUL PAGE: ', simulationId);
@@ -46,25 +45,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }
 
 
-    // const [loadingBalance, setLoadingBalance] = useState(false);
-    async function getResponseForBalance() {
-      // setLoadingBalance(true);
-      const { data, error } = await supabase
-        .from('user_responses')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('question_id', questionId)
-      
-      if(error) {
-        console.log('error while fetching response for balance');
-      }
-
-      if(data) {
-        setBalance(data[0].response);
-        // setLoadingBalance(false);
-      }
-    }
-
+    
     // Rule-based Function determining one of three results
     // "Keamanan atau Likuiditas Tinggi" -> "Tabungan atau Deposito"
     // "Toleransi resiko tinggi, minat invest tinggi" -> "Saham atau Reksadana"
@@ -151,8 +132,8 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       const { data, error } = await supabase
         .from('records')
         .select('*')
-      console.log('MASUK GET RECORDS');
-      if(error) {
+        // console.log('MASUK GET RECORDS');
+        if(error) {
         console.log('Error while fetching records', error);
       }
       if(data) {
@@ -179,7 +160,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         setRuleBasedResponses((prevItem) => [...prevItem, data[0].response]);
       }
     }
-
+    
     useEffect(() => {
       getRulebasedRecommendation();
     }, [ruleBasedResponses])
@@ -204,6 +185,31 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }, [userId, ruleBasedQuestionIds])
     
 
+    // START PART 1: CALCULATING FIRST BALANCE BASED ON SALARY
+    const [balance, setBalance] = useState<string>();
+    const [dummyBalance, setDummyBalance] = useState<number>();
+    const [balanceAfterPurchase, setBalanceAfterPurchase] = useState<number>();
+
+    async function getResponseForBalance() {
+      const { data, error } = await supabase
+        .from('user_responses')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('question_id', questionId)
+      
+      if(error) {
+        console.log('error while fetching response for balance');
+      }
+
+      if(data && data[0] && data[0].response) {
+        console.log('ada resp balance');
+        setBalance(data[0].response);
+      } else {
+        console.log('tidak ada resp balance');
+        setDummyBalance(1000000000);
+      }
+    }
+
     useEffect(() => {
       if(userId && questionId) {
         getResponseForBalance()
@@ -211,17 +217,73 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }, [userId, questionId]);
 
     useEffect(() => {
+      console.log('balance before anything: ', balance);
       if(balance) {
         if(balance.length > 0) {
           const newBalance = getUpperBound(balance);
-          // console.log('new balance after conversion: ', newBalance);
+          console.log('new balance after conversion: ', newBalance);
           setDummyBalance(newBalance * 24000000);
-        } else {
-          setDummyBalance(1000000000);
         }
       }
     }, [balance])
 
+    // END PART 1: CALCULATING FIRST BALANCE BASED ON SALARY
+
+    // START PART 2: UPDATING BALANCE AFTER USER PURCHASE
+
+    const [userPurchases, setUserPurchases] = useState<UserPurchase[]>([]);
+    async function fetchUserPurchase() {
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .select('*')
+        .eq('user_id', userId)
+      
+      if(error) {
+        console.log('error while fetching user purchase', error);
+      }
+      if(data) {
+        console.log('data user purchases: ', data);
+        setUserPurchases(data);
+      }
+    }
+
+    useEffect(() => {
+      if(userId) {
+        fetchUserPurchase();
+      }
+    }, [userId])
+    
+    useEffect(() => {
+      if(userId && dummyBalance && userPurchases && userPurchases.length > 0) {
+        console.log('ADA USER PURCHASES');
+
+        // Calculating remaining amount of balance
+        let finalAmount = dummyBalance;
+        userPurchases.forEach((userPurchase) => {
+          
+          // Subtracting balance with user purchases
+          console.log('dummy balance on user purchase: ', dummyBalance);
+
+          let amountPurchased = ((userPurchase.percentage_purchased/100) * dummyBalance)
+          finalAmount = finalAmount - amountPurchased;
+          console.log('amount purchased: ', amountPurchased);
+          console.log('change of final amount: ', finalAmount);
+          
+        });
+        console.log('FINAL amount: ', finalAmount);
+
+        setBalanceAfterPurchase(finalAmount);
+
+      }
+      else {
+        console.log('TIDAK ADA USER PURCHASES');
+      }
+    }, [userPurchases, userId, dummyBalance])
+    
+    
+    // END PART 2: UPDATE BALANCE AFTER USER PURCHASE
+
+    
     const [listPageData, setListPageData] = useState<Pages>();
     const fetchListPage = async () => {
       const { data, error } = await supabase
@@ -265,44 +327,6 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       }
     }
 
-    const [userPurchases, setUserPurchases] = useState<UserPurchase[]>([]);
-    async function fetchUserPurchase() {
-      const { data, error } = await supabase
-        .from('user_purchases')
-        .select('*')
-        .eq('user_id', userId)
-      
-      if(error) {
-        console.log('error while fetching user purchase', error);
-      }
-      if(data) {
-        console.log('data user purchases: ', data);
-        setUserPurchases(data);
-      }
-    }
-
-    useEffect(() => {
-      if(userId) {
-        fetchUserPurchase();
-      }
-    }, [userId])
-    
-    let dummyBalanceRef = 0;
-    if(dummyBalance) {
-      dummyBalanceRef = dummyBalance;
-    }
-    const [displayedBalance, setDisplayedBalance] = useState(0);
-    useEffect(() => {
-      if(dummyBalance && userPurchases.length > 0) {
-        console.log('dummyBalanceRef global: ', dummyBalanceRef);
-        userPurchases.map((userPurchase) => {
-          console.log('USER PURCHASED: ', userPurchase.name_purchased);
-          dummyBalanceRef -= ((dummyBalance! * userPurchase.percentage_purchased)/100)
-        });
-        console.log('DUMMY BALANCE REF: ', dummyBalanceRef);
-        setDisplayedBalance(dummyBalanceRef);
-      }
-    }, [userPurchases])
 
     const navigate = useNavigate();
     const [finishSimulationModal, setFinishSimulationModal] = useState(false);
@@ -322,7 +346,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         .update({
           finished_simulation: finishSimulation,
           phone_number: phoneNumber
-        })
+        }) 
         .eq('id', simulationId)
 
       if(error) {
@@ -400,30 +424,27 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
             </div>
           </div>
         </div>
+        <div className="px-3 font-semibold text-xl text-slate-700">Halo, {email}</div>
         <div className="px-3 font-semibold text-xl text-slate-700">
           Saldo Anda: {
+
             userPurchases.length > 0 ?
-            displayedBalance !== 0 ? formatCurrency(displayedBalance)  : 'Calculating balance...'
-            :
-            dummyBalance ? formatCurrency(dummyBalance)  : 'Calculating balance...'
+
+              balanceAfterPurchase ?
+                formatCurrency(balanceAfterPurchase)
+                :
+                "Rp 0"
+
+              :
+              
+              dummyBalance ?
+                formatCurrency(dummyBalance)
+                :
+                "Calculating dummy balance"
+
           }
           {'\n'}/ { formatCurrency(dummyBalance!) }
         </div>
-        {/* <div className="px-3">
-          <div className="font-medium">Your profile is</div>
-          <div className="flex flex-col">
-            {
-              ruleBasedResponses.map((response, index) => (
-                <div key={index} className="list">
-                  {response}
-                </div>
-              ))
-            }
-          </div>
-        </div> */}
-        {/* <div>
-          {rekomendasi.length > 0 && rekomendasi}
-        </div> */}
         <div className="px-3 text-xl text-slate-700 font-bold max-tablet:text-center max-mobile:text-center">Anda sudah membeli</div>
         <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center ">
           {
