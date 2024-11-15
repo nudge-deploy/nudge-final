@@ -585,8 +585,14 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
               userPurchases.map((purchased) => (
                 <div className="relative p-3 m-3 bg-primary w-36 h-44 rounded-xl hover:scale-105 transition">
                   <div className="text-white text-base font-semibold">{purchased.name_purchased}</div>
-                  <div className="absolute bottom-13 right-3 text-white text-3xl font-bold">{purchased.percentage_purchased}%</div>
-                  <div onClick={() => setResellModal(true)} className="bg-slate-100 px-2 py-1 rounded-md absolute left-3 bottom-3 text-primary text-sm font-bold hover:scale-105 transition" >Jual kembali</div>
+                  {
+                    purchased.name_purchased.includes('Kredit') ?
+                      <></>
+                    :
+
+                      <div className="absolute bottom-13 right-3 text-white text-3xl font-bold">{purchased.percentage_purchased}%</div>
+                  }
+                  <div onClick={() => setResellModal(true)} className="bg-slate-100 px-2 py-1 rounded-md absolute left-3 bottom-3 text-primary text-sm font-bold hover:scale-105 transition" >{ purchased.name_purchased.includes('Kredit') ? "Batalkan" : "Jual kembali" }</div>
                   <Modal
                     ariaHideApp={false}
                     isOpen={resellModal}
@@ -598,7 +604,12 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
                     <div className="bg-slate-100 rounded-lg shadow-lg p-6 max-w-md mx-auto space-y-4">
                       {/* Header */}
                       <div className="flex items-center justify-between pb-4 border-b">
-                        <h2 className="text-lg font-semibold text-gray-700">Jual kembali {purchased.name_purchased}</h2>
+                        {
+                          purchased.name_purchased.includes('Kredit') ?
+                            <h2 className="text-lg font-semibold text-gray-700">Batalkan {purchased.name_purchased}</h2>
+                          :
+                            <h2 className="text-lg font-semibold text-gray-700">Jual kembali {purchased.name_purchased}</h2>
+                        }
                         <button
                           onClick={() => setResellModal(false)}
                           className="btn btn-circle btn-ghost text-gray-600"
@@ -606,8 +617,17 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
                           ✕
                         </button>
                       </div>
+                      
+                      {
+                        purchased.name_purchased.includes('Kredit') ?
 
-                      <div className="text-gray-700">Yakin ingin menjual kembali produk {purchased.name_purchased} sebanyak {purchased.percentage_purchased}%?</div>
+                        <div className="text-gray-700">Yakin ingin membatalkan pengajuan {purchased.name_purchased}?</div>
+
+                        :
+
+                        <div className="text-gray-700">Yakin ingin menjual kembali produk {purchased.name_purchased} sebanyak {purchased.percentage_purchased}%?</div>
+
+                      }
                       <div className="flex justify-end space-x-2 pt-4">
                         <button
                           className="btn btn-secondary text-slate-100"

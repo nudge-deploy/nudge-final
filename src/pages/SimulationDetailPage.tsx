@@ -137,7 +137,7 @@ export default function SimulationDetailPage() {
       <div className="text-slate-700 text-base">{record.record_description}</div>
       <div className="flex flex-row space-y-3 space-x-3 items-center">
         <div className="text-slate-700 font-medium">Tertarik membeli produk ini?</div>
-        <button onClick={() => setModalPurchase(true)} className="btn btn-primary w-32 text-slate-100">Beli sekarang</button>
+        <button onClick={() => setModalPurchase(true)} className="btn btn-primary w-32 text-slate-100">{ record.record_name.includes('Kredit') ? 'Ambil kredit' : 'Beli sekarang' }</button>
         <button onClick={() => navigate('/simulation')} className="btn btn-accent w-32 text-slate-100">Kembali</button>
       </div>    
       <Modal
@@ -149,7 +149,7 @@ export default function SimulationDetailPage() {
         <div className="bg-slate-100 rounded-lg shadow-lg p-6 max-w-md mx-auto space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b">
-            <h2 className="text-lg font-semibold text-gray-700">Confirm Purchase</h2>
+            <h2 className="text-lg font-semibold text-gray-700">Konfirmasi Pembelian</h2>
             <button
               onClick={() => setModalPurchase(false)}
               className="btn btn-circle btn-ghost text-gray-600"
@@ -158,19 +158,26 @@ export default function SimulationDetailPage() {
             </button>
           </div>
 
-          <div className="text-gray-700">Specify your % purchase of {record.record_title}</div>
-          <input 
-            onChange={handleChange}
-            value={inputValue}
-            type='number' 
-            className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
-          />
+          {
+            record.record_name.includes('Kredit') ?
+              <div className="text-gray-700">Apakah anda yakin ingin mengajukan {record.record_title}</div>
+            :
+              <>
+                <div className="text-gray-700">Berapa persentase dari saldo yang Anda mau belanjakan untuk {record.record_title}</div>
+                <input 
+                  onChange={handleChange}
+                  value={inputValue}
+                  type='number' 
+                  className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
+                />
+              </>
+          }
           <div className="flex justify-end space-x-2 pt-4">
             <button
               className="btn btn-ghost"
               onClick={() => setModalPurchase(false)}
             >
-              Cancel
+              Batal
             </button>
             <button
               className="btn btn-primary text-slate-100"
@@ -178,7 +185,7 @@ export default function SimulationDetailPage() {
                 () => handleUserPurchase({ user_id: userId, name_purchased: record.record_title, percentage_purchased: inputValue! })
               }
             >
-              Purchase
+              { record.record_name.includes('Kredit') ? "Ajukan" : "Beli" }
             </button>
           </div>
         </div>
@@ -195,22 +202,22 @@ export default function SimulationDetailPage() {
         <div className="bg-slate-100 rounded-lg shadow-lg p-6 max-w-md mx-auto space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between pb-4 border-b">
-            <h2 className="text-lg font-semibold text-gray-700">Successful Purchase</h2>
+            <h2 className="text-lg font-semibold text-gray-700">{ record.record_name.includes('Kredit') ? "Pengajuan kredit diterima" : "Pembelian berhasil" }</h2>
             <button
               onClick={() => setModalPurchase(false)}
               className="btn btn-circle btn-ghost text-gray-600"
             >
               ✕
-            </button>
+            </button> 
           </div>
 
-          <div className="text-gray-700">Congrats! You successfully purchased {record.record_title}</div>
+          <div className="text-gray-700">{ record.record_name.includes('Kredit') ? `Selamat! Pengajuan ${record.record_title} Anda diterima` : `Selamat! Pembelian ${record.record_title} Anda berhasil`}</div>
           <div className="flex justify-end space-x-2 pt-4">
             <button
               className="btn btn-secondary"
               onClick={() => setModalSuccess(false)}
             >
-              Close
+              Tutup
             </button>
           </div>
         </div>

@@ -23,10 +23,11 @@ export default function SurveyForms() {
   const [loading, setLoading] = useState(false);
   const [sebutkan, setSebutkan] = useState(false);
 
-  // single-select, sebutkan
+  // single-select, sebutkan answer
   const [singleSebutkan, setSingleSebutkan] = useState(false);
+  const [singleSebutkanAnswer, setSingleSebutkanAnswer] = useState<{[key: string]: string}>({});
 
-  // sebutkanAnswer mapped by question_id
+  // milti sebutkanAnswer mapped by question_id
   const [sebutkanAnswer, setSebutkanAnswer] = useState<{[key: string]: string}>({});
 
   // debounce timer for multi_select submissions
@@ -66,6 +67,7 @@ export default function SurveyForms() {
   }
   
   async function postSingleSelectAnswer({ question_id, response } : UserResponse) {
+    console.log('RESPONS SINGLE: ', response);
     setSelectedOption((prevSelectedOption) => ({
       ...prevSelectedOption,
       [question_id]: response, // Set the selected option for the corresponding question
@@ -141,30 +143,6 @@ export default function SurveyForms() {
       return { ...prevSelectedOption, [question_id]: newSelection };
     });
   };
-
-  // useEffect(() => {
-  //   // Only proceed if there's a question ID to submit
-  //   const questionId = Object.keys(selectedOption).find(id => !answered[id]);
-  //   if (!questionId) return;
-
-  //   if (debounceTimer.current) {
-  //     clearTimeout(debounceTimer.current);
-  //   }
-  //   console.log('SELECTED OPTION ON USEEFFECT: ', selectedOption);
-  //   setMultiSelectLoading(true);
-  //   debounceTimer.current = setTimeout(() => {
-  //     postMultiSelectAnswer({
-  //       question_id: questionId,
-  //       response: selectedOption[questionId] || [],
-  //     });
-  //   }, 5000);
-
-  //   return () => {
-  //     if (debounceTimer.current) {
-  //       clearTimeout(debounceTimer.current);
-  //     }
-  //   };
-  // }, [selectedOption]);
   
   const fetchCurrentUserResponses = async () => {
     setLoading(true); 
@@ -235,6 +213,7 @@ export default function SurveyForms() {
 
       // biar ga ketrigger kebalik2 statenya
       setSebutkan(false);
+      setSingleSebutkan(false);
 
       // kalo change answer, kosongin si sebutkan
       // setSebutkanAnswer({});
@@ -341,7 +320,7 @@ export default function SurveyForms() {
     })
   }, [questions, surveyTypes])
 
-  console.log('sebutkan state: ', sebutkan);
+  // console.log('sebutkan state: ', sebutkan);
   
   if(loading) {
     return (
@@ -375,6 +354,20 @@ export default function SurveyForms() {
                             className="btn btn-sm bg-success text-slate-100 text-xs font-medium"
                             onClick={() =>
                               postMultiSelectAnswer({ question_id: question.id, response: selectedOption[question.id] || [] })
+                            }
+                            disabled={answered[question.id]}
+                          >
+                            Submit
+                          </button>
+                      }
+                      {
+                        question.id == '34a9bc07-28d5-4d6a-8ee7-b54c521eb8d0' && singleSebutkan && 
+                          <button
+                            className="btn btn-sm bg-success text-slate-100 text-xs font-medium"
+                            onClick={() => {
+                                console.log('single sebutkan answer: ', singleSebutkanAnswer[question.id])
+                                postSingleSelectAnswer({ question_id: question.id, response: [singleSebutkanAnswer[question.id]]})
+                              }
                             }
                             disabled={answered[question.id]}
                           >
@@ -432,9 +425,11 @@ export default function SurveyForms() {
                             key={index} 
                             onClick={ 
                               () => {
-                                postSingleSelectAnswer({ question_id: question.id, response: [option] });
                                 if(option.includes('sebutkan')) {
-                                  setSingleSebutkan(!singleSebutkan);
+                                  // kalo dipencet, set singleSebutkan true, triggers input field
+                                  setSingleSebutkan(true);
+                                } else {
+                                  postSingleSelectAnswer({ question_id: question.id, response: [option] });
                                 }
                               }
                             } 
@@ -451,8 +446,14 @@ export default function SurveyForms() {
                                       <input 
                                         type="text" 
                                         className="p-1 border border-slate-600 bg-slate-100"
-                                        // value={sebutkanAnswer[question.id]}
-                                        // onChange={(e) => setSebutkanAnswer((prev) => ({ ...prev, [question.id]: e.target.value}))}
+                                        onChange={(e) => {
+                                          console.log(e.target.value);
+                                          console.log(question.id);
+
+                                          setSingleSebutkanAnswer((prev) => ({ ...prev, [question.id]: e.target.value}))
+                                
+                                         
+                                        }}
                                       />
                                     :
                                       "Produk keuangan lain (Harap sebutkan)"
