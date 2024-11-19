@@ -1,7 +1,7 @@
   import { useEffect, useRef, useState } from "react";
   import supabase from "../database/supabaseClient";
   import { useGetUser } from "../hooks/useGetUser";
-  import { Pages, Records, UserPageVisits, UserPurchase } from "../interface/SimulationInterface";
+  import { Pages, Records, UserPageVisits, UserPurchase, UserRecommendation } from "../interface/SimulationInterface";
   import RecordCard from "../components/RecordCard";
   import RelatedRecordCard from "../components/RelatedRecordCard";
   import { useNavigate } from "react-router-dom";
@@ -245,7 +245,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         console.log('Error while fetching records', error);
       }
       if(data) {
-        console.log('response records: ', data);
+        // console.log('response records: ', data);
         setRecords(data);
         // setLoading(false);
       }
@@ -386,7 +386,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
 
       }
       else {
-        console.log('TIDAK ADA USER PURCHASES');
+        // console.log('TIDAK ADA USER PURCHASES');
       }
     }, [userPurchases, userId, dummyBalance])
     
@@ -538,6 +538,59 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }, [startTimeRef, listPageData, simulationId]);
 
     const categories: string[] = ['Tabungan', 'Investasi', 'Kredit', 'Asuransi'];
+
+    // Log rulebased recommendation & post
+    const postRecommendation = async ({ user_id, recommended_product } : UserRecommendation) => {
+      if(userId) {
+
+        const { data, error } = await supabase
+          .from('user_recommendations')
+          .upsert({
+            user_id: user_id,
+            recommended_product: recommended_product
+          })
+          .select()
+        
+        if(error) {
+          console.log('error upserting recommendations: ', error);
+        } 
+        
+        if(data) {
+          console.log('successful upsert recommendations', data);
+        }
+
+      }
+    }
+
+    useEffect(() => {
+      // Ensure that all dependencies are valid before running the effect
+      if (!userId || !rekomendasi || !records || records.length === 0) {
+        console.log('no rekomendasi');
+        return;
+      }
+    
+      // Filter and map only if the conditions are met
+      const filteredRecords = records.filter((record) =>
+        rekomendasi.some((keyword) => record.record_title.includes(keyword))
+      );
+    
+      if (filteredRecords.length > 0) {
+        filteredRecords.forEach((record) => {
+          console.log('rulebased records: ', record.record_title);
+          console.log('records length: ', filteredRecords.length);
+          /*
+            Table: user_recommendations
+            column:
+            - id
+            - user_id
+            - recommended_product_name
+            upsert
+          */
+          // postRecommendation({user_id: userId, recommended_product: record.record_title});
+        });
+      }
+    }, [userId, rekomendasi, records]);
+    
     
     if(loading) {
       return (

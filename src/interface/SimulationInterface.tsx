@@ -31,3 +31,8 @@ export interface UserPurchase {
   name_purchased: string;
   percentage_purchased: number;
 }
+
+export interface UserRecommendation {
+  user_id: string;
+  recommended_product: string;
+}
