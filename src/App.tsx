@@ -24,7 +24,6 @@ function App() {
           <Route path='surveyHome' element={<SurveyHome/>}/>
           <Route path='surveyForms' element={<SurveyForms/>}/>
           <Route path='simulation' element={<SimulationPage/>}/>
-          <Route path='admin-page' element={<AdminPage/>}/>
           <Route path='detail-page/:id' element={<SimulationDetailPage/>}/> 
         </Routes>
       </BrowserRouter>
