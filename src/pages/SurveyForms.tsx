@@ -247,11 +247,12 @@ export default function SurveyForms() {
   }
 
   const scrollToTop = () => {
-    console.log('scrolled to top 1')
-    if (scrollRef.current) {
-      console.log('scrolled to top 2')
-      scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    // console.log('scrolled to top 1')
+    // if (scrollRef.current) {
+    //   console.log('scrolled to top 2')
+    //   scrollRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    // }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleUserFinishSurvey = async (has_finished: boolean) => {
