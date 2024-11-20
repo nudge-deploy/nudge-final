@@ -125,7 +125,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           ) &&
           (responses.includes('Setiap bulan') && (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga')))
         ) {
-          setRekomendasi(['Reksadana', 'Rumah', 'Kartu']);
+          setRekomendasi(['Reksa Dana', 'Rumah', 'Kartu']);
         } 
         else if (
           // Conditions that output 'Reksadana' and 'Rumah'
@@ -136,7 +136,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           ) &&
           (responses.includes('Tidak, saya menyewa') || responses.includes('Tinggal dengan keluarga'))
         ) {
-          setRekomendasi(['Reksadana', 'Rumah']);
+          setRekomendasi(['Reksa Dana', 'Rumah']);
         } 
         else if (
           // Conditions that output 'Reksadana' and 'Kartu'
@@ -147,7 +147,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           ) &&
           responses.includes('Setiap bulan')
         ) {
-          setRekomendasi(['Reksadana', 'Kartu']);
+          setRekomendasi(['Reksa Dana', 'Kartu']);
         } 
         else if (
           // Conditions that output 'Reksadana' only
@@ -159,7 +159,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           !responses.includes('Tidak, saya menyewa') &&
           !responses.includes('Tinggal dengan keluarga')
         ) {
-          setRekomendasi(['Reksadana']);
+          setRekomendasi(['Reksa Dana']);
         } 
 
         // Deposito, Rumah, Kartu
