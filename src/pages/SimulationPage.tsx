@@ -227,7 +227,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         ) {
           setRekomendasi(['Tabungan', 'Kartu']);
         } 
-        else {
+        else if(responses.includes('Risiko sangat rendah') && responses.includes('Keamanan dan menghindari risiko')) {
           // Default if no conditions match
           setRekomendasi(['Tabungan']);
         }
@@ -270,7 +270,9 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }
     
     useEffect(() => {
-      getRulebasedRecommendation();
+      if(ruleBasedResponses) {
+        getRulebasedRecommendation();
+      }
     }, [ruleBasedResponses])
 
     useEffect(() => {
@@ -548,7 +550,8 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           .upsert({
             user_id: user_id,
             recommended_product: recommended_product
-          })
+          },
+          )
           .select()
         
         if(error) {
@@ -564,16 +567,19 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
 
     useEffect(() => {
       // Ensure that all dependencies are valid before running the effect
-      if (!userId || !rekomendasi || !records || records.length === 0) {
+      if (!rekomendasi) {
         console.log('no rekomendasi');
         return;
       }
-    
-      // Filter and map only if the conditions are met
+
+      console.log('REKOMENDASI: ', rekomendasi);
+
       const filteredRecords = records.filter((record) =>
         rekomendasi.some((keyword) => record.record_title.includes(keyword))
       );
-    
+
+      console.log('filtered records: ', filteredRecords);
+
       if (filteredRecords.length > 0) {
         filteredRecords.forEach((record) => {
           console.log('rulebased records: ', record.record_title);
@@ -586,10 +592,11 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
             - recommended_product_name
             upsert
           */
-          // postRecommendation({user_id: userId, recommended_product: record.record_title});
+          postRecommendation({user_id: userId, recommended_product: record.record_title});
         });
       }
-    }, [userId, rekomendasi, records]);
+    
+    }, [rekomendasi]);
     
     
     if(loading) {

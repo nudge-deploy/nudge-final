@@ -6,7 +6,6 @@ import SurveyHome from './pages/SurveyHome'
 import SurveyForms from './pages/SurveyForms'
 import { SessionProvider } from './context/SessionContext'
 import SimulationPage from './pages/SimulationPage'
-import AdminPage from './pages/AdminPage'
 import SimulationDetailPage from './pages/SimulationDetailPage'
 
 function App() {

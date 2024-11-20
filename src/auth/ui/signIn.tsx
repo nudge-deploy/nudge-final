@@ -20,10 +20,8 @@ export default function SignIn() {
       });
 
       if(error) {
-        throw new Error("Error while signing up");
-      } else if(data.email.includes('admin')) {
-        console.log('admin signin success');
-        navigate('/admin-page');
+        alert('Some problems occured. Please go back and reload the page.');
+        setLoading(false);
       } else {
         setLoading(false);
         console.log('Success signing in');

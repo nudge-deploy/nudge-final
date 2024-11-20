@@ -332,6 +332,7 @@ export default function SurveyForms() {
   }
   return (
     <div className="flex flex-col justify-center items-center p-3 bg-slate-100 text-slate-800 min-h-screen">
+      <div className="text-xs text-center pb-3 font-light text-green-600">Jawaban Anda tersimpan secara otomatis. Anda dapat kembali kapan saja untuk melanjutkan.</div>
       <div className="border border-1 p-4 w-1/2 max-mobile:w-full max-tablet:w-full">
         <div ref={scrollRef} className="text-xl font-bold">{currentSurveyType}</div>
         <div className="flex flex-col overflow-auto">
