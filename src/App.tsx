@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
 import SignIn from './auth/ui/signIn'
 import SignUp from './auth/ui/signUp'
 import Consent from './Consent'
@@ -9,6 +9,7 @@ import SimulationPage from './pages/SimulationPage'
 import SimulationDetailPage from './pages/SimulationDetailPage'
 
 function App() {
+  
 
   return (
     <SessionProvider>

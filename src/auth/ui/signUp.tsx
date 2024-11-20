@@ -10,6 +10,8 @@ export default function SignUp() {
   const { register, handleSubmit } = useForm<AuthProps>();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  // const [sessionChecked, setSessionChecked] = useState(false); // Track session check state
+  // const [isMounted, setIsMounted] = useState(false); // Track if the component is mounted
 
   async function handleSignUp(data: AuthProps) {
     setLoading(true);
@@ -21,7 +23,7 @@ export default function SignUp() {
     }
     let { error } = await
       supabase.auth.signUp({
-        email: data.email,
+        email: data.email,  
         password: data.password
       });
 
@@ -40,6 +42,41 @@ export default function SignUp() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [])
   
+  // Check session on component mount
+  // useEffect(() => {
+  //   let isActive = true;
+
+  //   async function getCurrentSession() {
+  //     try {
+  //       const { data, error } = await supabase.auth.getSession();
+  //       if (isActive && data && data.session) {
+  //         navigate('/surveyHome');
+  //       }
+  //       if (error) {
+  //         console.error(error);
+  //       }
+  //     } catch (error) {
+  //       console.error('Session error:', error);
+  //     } finally {
+  //       if (isActive) {
+  //         setSessionChecked(true);
+  //       }
+  //     }
+  //   }
+
+  //   if (!sessionChecked && isMounted) {
+  //     getCurrentSession();
+  //   }
+
+  //   return () => {
+  //     isActive = false; // Cleanup effect to prevent state updates after unmounting
+  //   };
+  // }, [sessionChecked, isMounted, navigate]);
+
+  // // Set the component as mounted after the first render
+  // useEffect(() => {
+  //   setIsMounted(true);
+  // }, []);
 
   if(loading) {
     return (

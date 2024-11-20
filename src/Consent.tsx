@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import supabase from "./database/supabaseClient";
+import { useGetUser } from "./hooks/useGetUser";
 
 
 export default function Consent() {
 
   const [consentAgree, setConsentAgree] = useState(false);
+  const navigate = useNavigate();
   const [sessionChecked, setSessionChecked] = useState(false); // Track session check state
   const [isMounted, setIsMounted] = useState(false); // Track if the component is mounted
-  const navigate = useNavigate();
+  const { userId } = useGetUser();
 
   const purposeOfStudy = "Anda diundang untuk berpartisipasi dalam penelitian yang bertujuan mengoptimalkan strategi kampanye digital melalui penggunaan nudge berbasis data. Tujuan penelitian ini adalah untuk mengumpulkan data yang akan membantu kami memahami bagaimana berbagai nudge memengaruhi perilaku dan pengambilan keputusan pengguna. Informasi ini akan digunakan untuk mengembangkan model dalam mengoptimalkan nudge pada kampanye pemasaran digital."
   const purposeOfStudyEng = "(You are being invited to participate in a research study aimed at optimizing digital campaign strategies through the use of data-driven nudges. The purpose of this study is to collect data that will help us understand how different nudges influence user behavior and decision-making. This information will be used to develop a model for optimizing nudges in digital marketing campaigns.)"
@@ -20,8 +22,7 @@ export default function Consent() {
   const risks = "(The risks associated with this study are minimal. You may feel discomfort in answering some personal questions, but you are free to skip any question you prefer not to answer.)"
   const manfaat = "Meskipun tidak ada manfaat langsung bagi Anda dalam berpartisipasi dalam penelitian ini, partisipasi Anda akan berkontribusi pada pemahaman yang lebih baik tentang cara meningkatkan strategi kampanye digital, yang mungkin akan memberikan manfaat bagi bisnis dan konsumen di masa depan"
   const benefits = "(While there are no direct benefits to you for participating in this study, your participation will contribute to a better understanding of how to improve digital campaign strategies, which may benefit businesses and consumers in the future.)"
-
-
+  
   // Check session on component mount
   useEffect(() => {
     let isActive = true;
@@ -30,7 +31,11 @@ export default function Consent() {
       try {
         const { data, error } = await supabase.auth.getSession();
         if (isActive && data && data.session) {
-          navigate('/surveyHome');
+          console.log('LOGGED IN USER ON CONSENT');
+          // navigate('/surveyHome');
+        } else {
+          console.log('USER LOGGED OUT');
+          navigate('/auth/ui/signUp');
         }
         if (error) {
           console.error(error);
@@ -57,7 +62,49 @@ export default function Consent() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const checkUserConsent = async () => {
+    const { data, error } = await supabase
+      .from('user_consent_form')
+      .select('consent_agreement')
+      .eq('user_id', userId);
+    
+    if(error) {
+      console.log('error checking consent agreement');
+    }
+
+    if(data && data.length > 0) {
+      console.log('successful checking user consent', data);
+      navigate('/surveyHome');
+    } else {
+      console.log('user consent doenst exist');
+    }
+  }
+
+  useEffect(() => {
+    if(userId) {
+      checkUserConsent();
+    }
+  }, [userId])
   
+
+  const handleSubmitConsent = async (consentAgreed: boolean) => {
+    const { data, error } = await supabase
+      .from('user_consent_form')
+      .insert({
+        user_id: userId,
+        consent_agreement: consentAgreed
+      })
+      .select();
+
+    if(error) {
+      console.log('error while submitting consent form');
+    }
+    if(data) {
+      console.log('successful consent form submitted', data);
+      navigate('/surveyHome')
+    }
+  }
 
   return (
     <div className="p-3 h-full flex flex-col space-y-3 justify-center items-center bg-slate-100 text-slate-700">
@@ -232,7 +279,7 @@ export default function Consent() {
           {
             consentAgree && 
             <div className="flex justify-center p-6">
-              <Link className='p-3 btn btn-primary text-slate-100 text-base' to='auth/ui/signUp'>Ayo mulai</Link>
+              <button className='p-3 btn btn-primary text-slate-100 text-base' onClick={() => handleSubmitConsent(true)}>Ayo mulai</button>
             </div>
           }      
         </div>

@@ -25,7 +25,8 @@ export default function SignIn() {
       } else {
         setLoading(false);
         console.log('Success signing in');
-        navigate('/surveyHome')
+        // navigate('/surveyHome')
+        navigate('/');
       }
   }
 

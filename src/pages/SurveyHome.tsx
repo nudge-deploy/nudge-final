@@ -15,7 +15,7 @@ export default function SurveyHome() {
       throw new Error('Error while signing out');
     } else {
       console.log('user signed out');
-      navigate('/')
+      navigate('/auth/ui/signUp')
     }
   }
 
@@ -68,6 +68,31 @@ export default function SurveyHome() {
       checkUserFinishSurvey();
     }
   }, [userId]);
+
+  const checkUserConsent = async () => {
+    const { data, error } = await supabase
+      .from('user_consent_form')
+      .select('consent_agreement')
+      .eq('user_id', userId);
+    
+    if(error) {
+      console.log('error checking consent agreement');
+    }
+
+    if(data && data.length > 0) {
+      console.log('successful checking user consent', data);
+      navigate('/surveyHome');
+    } else {
+      console.log('user consent doenst exist');
+      navigate('/');
+    }
+  }
+
+  useEffect(() => {
+    if(userId) {
+      checkUserConsent();
+    }
+  }, [userId])
 
   useEffect(() => {
     if(startSimulation) {
