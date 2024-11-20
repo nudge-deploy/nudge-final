@@ -77,6 +77,10 @@ export default function SurveyHome() {
       console.log('simulation not started!!');
     }
   }, [startSimulation, navigate])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [])
   
 
   if(!user) {
@@ -92,17 +96,17 @@ export default function SurveyHome() {
   return (
     <div className="p-3 bg-slate-100 h-screen flex flex-col space-y-3 justify-center items-center max-mobile:justify-center max-tablet:justify-center">
       <div className="text-slate-700 text-center text-xl font-bold">
-        Welcome, {user?.email}
+        Selamat datang, {user?.email}
       </div>
       <div className="text-center text-base text-slate-700">
-        Start if you are ready to take the study
+        Silakan mulai apabila Anda merasa sudah siap. Jawaban Anda akan tersimpan secara otomatis.
       </div>
       <Link 
         className="btn btn-primary text-base text-slate-100" 
         to="/surveyForms">
-        Let's start
+        Ayo mulai
       </Link>
-      <button className="btn btn-link text-slate-700" onClick={userSignOut}>Sign out</button>
+      <button className="btn btn-link text-slate-700" onClick={userSignOut}>Keluar</button>
     </div>
 
   )

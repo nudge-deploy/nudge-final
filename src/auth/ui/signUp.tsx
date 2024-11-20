@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form"
 import supabase from "../../database/supabaseClient";
 import { AuthProps } from "../../interface/AuthInterface";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 
 export default function SignUp() {
@@ -36,6 +36,11 @@ export default function SignUp() {
       }
   }
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [])
+  
+
   if(loading) {
     return (
       <div className="h-screen flex justify-center items-center bg-slate-100">
@@ -47,12 +52,12 @@ export default function SignUp() {
   return (
     <div className="h-screen flex justify-center items-start max-tablet:items-center max-mobile:items-center bg-slate-100">
       <form onSubmit={handleSubmit(handleSignUp)} className="flex flex-col space-y-2 max-w-md p-4 max-tablet:w-4/5 max-mobile:w-11/12">
-        <div className="text-xl text-slate-700">Create account to enter the study</div>
-        <div className="text-xs text-slate-700">Don't worry. It will be quick :)</div>
+        <div className="text-xl text-center text-slate-700">Mari membuat akun terlebih dahulu</div>
+        <div className="text-xs text-center text-slate-700">Email dan password tidak wajib valid. Namun, email yang valid akan lebih baik.</div>
         <input {...register("email", { required: "This is required"})} className="input input-primary bg-slate-100 input-bordered text-xs text-slate-700" type="email" placeholder="Email" />
         <input {...register("password", { required: "This is required"})} className="input input-primary bg-slate-100 input-bordered text-xs text-slate-700" type="password" placeholder="Password" />
-        <input className="btn btn-primary text-slate-100" type="submit"/>   
-        <div className="text-xs text-center text-slate-700">Already have an account? <Link to='/auth/ui/signIn' className="text-slate-700 text-xs underline">Sign In</Link></div>
+        <input className="btn btn-primary text-slate-100" type="submit"  value='Buat akun'/>   
+        <div className="text-xs text-center text-slate-700">Sudah punya akun? <Link to='/auth/ui/signIn' className="text-slate-700 text-xs underline">Masuk</Link></div>
       </form>
     </div>
   )

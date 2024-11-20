@@ -216,7 +216,14 @@ export default function Consent() {
 
             <div className="flex items-center justify-center p-8">
               <div className="flex flex-row space-x-2">
-                <input type="checkbox" onClick={() => setConsentAgree(!consentAgree)} className="checkbox checkbox-primary" />
+                <input 
+                  type="checkbox" 
+                  onClick={() => {
+                    setConsentAgree(!consentAgree);
+                  }
+                  } 
+                  className="checkbox checkbox-primary" 
+                />
                 <div>SAYA SETUJU untuk berpartisipasi dalam penelitian ini</div>
                 <div>(I AGREE to participate in this study)</div>
               </div>
@@ -225,7 +232,7 @@ export default function Consent() {
           {
             consentAgree && 
             <div className="flex justify-center p-6">
-              <Link className='p-3 btn btn-primary text-slate-100 text-base' to='auth/ui/signUp'>Let's start</Link>
+              <Link className='p-3 btn btn-primary text-slate-100 text-base' to='auth/ui/signUp'>Ayo mulai</Link>
             </div>
           }      
         </div>
