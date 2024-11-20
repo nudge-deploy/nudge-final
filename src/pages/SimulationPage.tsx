@@ -476,27 +476,55 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     async function handleFinishSimulation(finishSimulation: boolean, phoneNumber: string) {
       setLoading(true);
       console.log('MASUK handle finish sim', simulationId);
-      const { error } = await supabase
-        .from('user_finish_simulations')
-        .update({
-          finished_simulation: finishSimulation,
-          phone_number: phoneNumber
-        }) 
-        .eq('id', simulationId)
 
-      if(error) {
-        console.log('error while posting finish simulation SIMULPAGE: ', error.message);
-        if(error.message.includes('duplicate')) {
-          setLoading(false);
+      // Check if phone num is filled by the user
+      if(phoneNumber.length > 0) {
+        console.log('finished on if: ', finishSimulation);
+        const { error } = await supabase
+          .from('user_finish_simulations')
+          .update({
+            finished_simulation: finishSimulation,
+            phone_number: phoneNumber
+          }) 
+          .eq('id', simulationId)
+  
+        if(error) {
+          console.log('error while posting finish simulation SIMULPAGE: ', error.message);
+          if(error.message.includes('duplicate')) {
+            setLoading(false);
+            userSignOut();
+            setFinishSimulationModal(false);
+          }
+        } else {
+          console.log('MASUK handle UPDATE success');
           userSignOut();
           setFinishSimulationModal(false);
+          setLoading(false);
+          // userSignOut();
         }
       } else {
-        console.log('MASUK handle UPDATE success');
-        userSignOut();
-        setFinishSimulationModal(false);
-        setLoading(false);
-        // userSignOut();
+        console.log('finished on else: ', finishSimulation)
+        const { error } = await supabase
+          .from('user_finish_simulations')
+          .update({
+            finished_simulation: true,
+          }) 
+          .eq('id', simulationId)
+  
+        if(error) {
+          console.log('error while posting finish simulation SIMULPAGE: ', error.message);
+          if(error.message.includes('duplicate')) {
+            setLoading(false);
+            userSignOut();
+            setFinishSimulationModal(false);
+          }
+        } else {
+          console.log('MASUK handle UPDATE success');
+          userSignOut();
+          setFinishSimulationModal(false);
+          setLoading(false);
+          // userSignOut();
+        }
       }
     }
 
@@ -597,6 +625,27 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
       }
     
     }, [rekomendasi]);
+
+    // Check user phone number existence on db
+    const [phoneExist, setPhoneExist] = useState(false);
+    useEffect(() => {
+      const checkUserPhoneNumber = async () => {
+        const { data, error } = await supabase
+          .from('user_finish_simulations')
+          .select('phone_number')
+          .eq('user_id', userId)
+
+        if(error) {
+          console.log('error checking phone number: ', error);
+        }
+
+        if(data && data[0] && data[0].phone_number.length > 0) {
+          setPhoneExist(true);
+        }
+      }
+      checkUserPhoneNumber();
+    }, [userId])
+    
     
     
     if(loading) {
@@ -770,14 +819,21 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
               <h2 className="text-lg font-semibold text-gray-700">Thank you for finishing the study!</h2>
             </div>
 
-            <div className="text-gray-700">Thank you for finishing the study! Kindly fill your phone number below. We have some e-wallet prize as a thanks for your contribution to the study.</div>
-
-            <input 
-              onChange={handleChangePhone}
-              value={phoneNumberValue}
-              type='text' 
-              className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
-            />
+            {
+              phoneExist ?
+                <div className="text-gray-700">Thank you for finishing the study! You can redo this simulation many times you like.</div>
+              :
+              <>
+                <div className="text-gray-700">Thank you for finishing the study! Kindly fill your phone number below. We have some e-wallet prize as a thanks for your contribution to the study.</div>
+    
+                <input 
+                  onChange={handleChangePhone}
+                  value={phoneNumberValue}
+                  type='text' 
+                  className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
+                />
+              </>
+            }
 
             <div className="flex justify-end space-x-2 pt-4">
               <button
