@@ -507,7 +507,8 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
         const { error } = await supabase
           .from('user_finish_simulations')
           .update({
-            finished_simulation: true,
+            finished_simulation: finishSimulation,
+            phone_number: ""
           }) 
           .eq('id', simulationId)
   
@@ -639,8 +640,12 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           console.log('error checking phone number: ', error);
         }
 
-        if(data && data[0] && data[0].phone_number.length > 0) {
-          setPhoneExist(true);
+        if(data) {
+          data.map((a) => {
+            if(a.phone_number.length > 0) {
+              setPhoneExist(true);
+            }
+          })
         }
       }
       checkUserPhoneNumber();
