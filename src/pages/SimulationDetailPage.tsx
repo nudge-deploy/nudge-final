@@ -33,7 +33,7 @@ export default function SimulationDetailPage() {
   const handleUserPurchase = async ({ name_purchased, percentage_purchased } : UserPurchase) => {
     console.log('user beli');
     
-    if(percentage_purchased <= remainingPercentage!) {
+    if(name_purchased.includes('Kredit') || percentage_purchased <= remainingPercentage!) {
       const { error } = await supabase
         .from('user_purchases')
         .insert({
