@@ -10,7 +10,9 @@ export const useGetUserBalance = () => {
   const [balance, setBalance] = useState<string>();
   const [dummyBalance, setDummyBalance] = useState<number>();
   const [balanceAfterPurchase, setBalanceAfterPurchase] = useState<number>();
-  
+  const [remainingPercentage, setRemainingPercentage] = useState<number>();
+  const [percentageSpent, setPercentageSpent] = useState<number>();
+
   // loading, to be exported to simulation page
   const [purchaseLoading, setPurchaseLoading] = useState(false);
 
@@ -99,12 +101,24 @@ export const useGetUserBalance = () => {
       console.log('FINAL amount: ', finalAmount);
 
       setBalanceAfterPurchase(finalAmount);
+      
+      setPercentageSpent(100 - (finalAmount / dummyBalance)*100);
+      setRemainingPercentage((finalAmount / dummyBalance)*100);
 
     }
     else {
       // console.log('TIDAK ADA USER PURCHASES');
+      setPercentageSpent(0);
+      setRemainingPercentage(100);
     }
   }, [userPurchases, userId, dummyBalance])
 
-  return { dummyBalance, balanceAfterPurchase, userPurchases, fetchUserPurchase, purchaseLoading }
+  return { 
+    dummyBalance, 
+    balanceAfterPurchase, 
+    userPurchases, 
+    fetchUserPurchase, 
+    percentageSpent,
+    remainingPercentage,
+    purchaseLoading }
 }

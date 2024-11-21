@@ -5,6 +5,15 @@ import supabase from "../database/supabaseClient";
 import { useGetUser } from "../hooks/useGetUser";
 import Modal from 'react-modal';
 import { useGetSimulation } from "../hooks/useGetSimulation";
+import { useGetUserBalance } from "../hooks/useGetUserBalance";
+
+function formatCurrency(value: number, currency: string = 'IDR', locale: string = 'id-ID'): string {
+  return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0, // No decimal places
+  }).format(value);
+}
 
 export default function SimulationDetailPage() {
 
@@ -13,7 +22,9 @@ export default function SimulationDetailPage() {
   const navigate = useNavigate();
   const { userId, email } = useGetUser();
   const { simulationId } = useGetSimulation();
-  console.log('simul id on detail: ', simulationId);
+  const { dummyBalance, balanceAfterPurchase, percentageSpent, remainingPercentage, userPurchases } = useGetUserBalance();
+
+  // console.log('simul id on detail: ', simulationId);
   const [modalPurchase, setModalPurchase] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
   const [inputValue, setInputValue] = useState<number>();
@@ -21,22 +32,26 @@ export default function SimulationDetailPage() {
   // handle user purchase
   const handleUserPurchase = async ({ name_purchased, percentage_purchased } : UserPurchase) => {
     console.log('user beli');
-
-    const { error } = await supabase
-      .from('user_purchases')
-      .insert({
-        user_id: userId,
-        name_purchased: name_purchased,
-        percentage_purchased: percentage_purchased,
-        simulation_id: simulationId,
-      });
     
-    if(error) {
-      console.log('error while user purchase: ', error);
+    if(percentage_purchased <= remainingPercentage!) {
+      const { error } = await supabase
+        .from('user_purchases')
+        .insert({
+          user_id: userId,
+          name_purchased: name_purchased,
+          percentage_purchased: percentage_purchased,
+          simulation_id: simulationId,
+        });
+      
+      if(error) {
+        console.log('error while user purchase: ', error);
+      } else {
+        console.log('successful product purchase: ');
+        setModalSuccess(true);
+        setModalPurchase(false);
+      }
     } else {
-      console.log('successful product purchase: ');
-      setModalSuccess(true);
-      setModalPurchase(false);
+      alert(`Anda hanya dapat membelanjakan maksimum ${remainingPercentage}% dari saldo Anda`);
     }
   }
 
@@ -163,13 +178,39 @@ export default function SimulationDetailPage() {
               <div className="text-gray-700">Apakah anda yakin ingin mengajukan {record.record_title}</div>
             :
               <>
-                <div className="text-gray-700">Berapa persentase dari saldo yang Anda mau belanjakan untuk {record.record_title}</div>
-                <input 
-                  onChange={handleChange}
-                  value={inputValue}
-                  type='number' 
-                  className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
-                />
+                <div className="text-sm text-gray-700">Berapa persentase dari saldo yang Anda mau belanjakan untuk {record.record_title}</div>
+                <div className="text-sm text-gray-700 font-bold">Saldo Anda: {
+
+                  userPurchases.length > 0 ?
+
+                    balanceAfterPurchase ?
+                      formatCurrency(balanceAfterPurchase)
+                      :
+                      "Rp 0"
+
+                    :
+                    
+                    dummyBalance ?
+                      formatCurrency(dummyBalance)
+                      :
+                      "Calculating dummy balance"
+
+                  }
+                  {'\n'}/ { formatCurrency(dummyBalance!) }
+                </div>
+                <div className="text-gray-700 text-sm font-bold">Anda sudah membelanjakan {percentageSpent}% dari saldo Anda.</div>
+                <div className="text-gray-700 text-sm font-bold">Anda dapat membelanjakan maksimum {remainingPercentage}% dari saldo Anda.</div>
+                {
+                  percentageSpent == 100 ?
+                  <div className="text-red-600 text-sm">Anda sudah tidak dapat belanja produk. Jual kembali produk untuk berbelanja ulang.</div>
+                  :
+                  <input 
+                    onChange={handleChange}
+                    value={inputValue}
+                    type='number' 
+                    className="input input-bordered w-full max-w-xs bg-slate-100 input-secondary text-gray-700" 
+                  />
+                }
               </>
           }
           <div className="flex justify-end space-x-2 pt-4">
@@ -181,6 +222,7 @@ export default function SimulationDetailPage() {
             </button>
             <button
               className="btn btn-primary text-slate-100"
+              disabled={!record.record_name.includes('Kredit') && percentageSpent == 100}
               onClick={
                 () => handleUserPurchase({ user_id: userId, name_purchased: record.record_title, percentage_purchased: inputValue! })
               }
