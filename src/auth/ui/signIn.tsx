@@ -25,10 +25,34 @@ export default function SignIn() {
       } else {
         setLoading(false);
         console.log('Success signing in');
-        // navigate('/surveyHome')
-        navigate('/');
+        navigate('/surveyHome')
+        // if(userId) {
+        //   // Keeping reruns low
+        //   checkUserConsent();
+        // } else {
+        //   console.log('user id belom ada');
+        // }
       }
   }
+
+  // const checkUserConsent = async () => {
+  //   const { data, error } = await supabase
+  //     .from('user_consent_form')
+  //     .select('consent_agreement')
+  //     .eq('user_id', userId);
+    
+  //   if(error) {
+  //     console.log('error checking consent agreement');
+  //   }
+
+  //   if(data && data.length > 0) {
+  //     console.log('successful checking user consent', data);
+  //     navigate('/surveyHome');
+  //   } else {
+  //     console.log('user consent doenst exist');
+  //     navigate('/');
+  //   }
+  // }
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });

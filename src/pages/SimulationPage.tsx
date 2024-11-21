@@ -8,6 +8,7 @@
   import { modalStyles } from "./SimulationDetailPage";
   import Modal from 'react-modal';
 import { useGetSimulation } from "../hooks/useGetSimulation";
+import { useGetUserPhone } from "../hooks/useGetUserPhone";
 
   export default function SimulationPage() {
 
@@ -508,7 +509,6 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           .from('user_finish_simulations')
           .update({
             finished_simulation: finishSimulation,
-            phone_number: ""
           }) 
           .eq('id', simulationId)
   
@@ -584,7 +584,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
           .select()
         
         if(error) {
-          console.log('error upserting recommendations: ', error);
+          console.log('error upserting recommendations: ');
         } 
         
         if(data) {
@@ -628,30 +628,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
     }, [rekomendasi]);
 
     // Check user phone number existence on db
-    const [phoneExist, setPhoneExist] = useState(false);
-    useEffect(() => {
-      const checkUserPhoneNumber = async () => {
-        const { data, error } = await supabase
-          .from('user_finish_simulations')
-          .select('phone_number')
-          .eq('user_id', userId)
-
-        if(error) {
-          console.log('error checking phone number: ', error);
-        }
-
-        if(data) {
-          data.map((a) => {
-            if(a.phone_number.length > 0) {
-              setPhoneExist(true);
-            }
-          })
-        }
-      }
-      checkUserPhoneNumber();
-    }, [userId])
-    
-    
+    const { phoneNumber } = useGetUserPhone();
     
     if(loading) {
       return (
@@ -825,7 +802,7 @@ import { useGetSimulation } from "../hooks/useGetSimulation";
             </div>
 
             {
-              phoneExist ?
+              phoneNumber.length > 0 ?
                 <div className="text-gray-700">Thank you for finishing the study! You can redo this simulation many times you like.</div>
               :
               <>

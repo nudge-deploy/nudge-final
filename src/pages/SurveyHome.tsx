@@ -66,6 +66,7 @@ export default function SurveyHome() {
   useEffect(() => {
     if(userId) {
       checkUserFinishSurvey();
+      checkUserConsent();
     }
   }, [userId]);
 
@@ -87,12 +88,6 @@ export default function SurveyHome() {
       navigate('/');
     }
   }
-
-  useEffect(() => {
-    if(userId) {
-      checkUserConsent();
-    }
-  }, [userId])
 
   useEffect(() => {
     if(startSimulation) {
