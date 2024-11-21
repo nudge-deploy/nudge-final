@@ -9,6 +9,7 @@
   import Modal from 'react-modal';
 import { useGetSimulation } from "../hooks/useGetSimulation";
 import { useGetUserPhone } from "../hooks/useGetUserPhone";
+import { useGetUserBalance } from "../hooks/useGetUserBalance";
 
   export default function SimulationPage() {
 
@@ -16,7 +17,6 @@ import { useGetUserPhone } from "../hooks/useGetUserPhone";
     const { userId, email } = useGetUser();
     const { simulationId } = useGetSimulation();
     // console.log('SIMULATION ID ON SIMUL PAGE: ', simulationId);
-    const questionId = "6d06b8b9-c3fa-4309-832c-222f3cb674db";
     const ruleBasedQuestionIds = [
       {
         rule_based_id: '897478ff-81d4-4b9a-975b-f01d82f83894',
@@ -35,9 +35,6 @@ import { useGetUserPhone } from "../hooks/useGetUserPhone";
     // for fetch rulebased, avoid double calls
     const hasFetchedResponses = useRef(false);
 
-    function getUpperBound(input: string) {
-      return parseInt(input[0].slice(-10));  
-    }
 
     function formatCurrency(value: number, currency: string = 'IDR', locale: string = 'id-ID'): string {
       return new Intl.NumberFormat(locale, {
@@ -295,106 +292,7 @@ import { useGetUserPhone } from "../hooks/useGetUserPhone";
       }
     }, [userId, ruleBasedQuestionIds])
     
-
-    // START PART 1: CALCULATING FIRST BALANCE BASED ON SALARY
-    const [balance, setBalance] = useState<string>();
-    const [dummyBalance, setDummyBalance] = useState<number>();
-    const [balanceAfterPurchase, setBalanceAfterPurchase] = useState<number>();
-
-    async function getResponseForBalance() {
-      const { data, error } = await supabase
-        .from('user_responses')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('question_id', questionId)
-      
-      if(error) {
-        console.log('error while fetching response for balance');
-      }
-
-      if(data && data[0] && data[0].response) {
-        console.log('ada resp balance');
-        setBalance(data[0].response);
-      } else {
-        console.log('tidak ada resp balance');
-        setDummyBalance(1000000000);
-      }
-    }
-
-    useEffect(() => {
-      if(userId && questionId) {
-        getResponseForBalance()
-      }
-    }, [userId, questionId]);
-
-    useEffect(() => {
-      console.log('balance before anything: ', balance);
-      if(balance) {
-        if(balance.length > 0) {
-          const newBalance = getUpperBound(balance);
-          console.log('new balance after conversion: ', newBalance);
-          setDummyBalance(newBalance * 24000000);
-        }
-      }
-    }, [balance])
-
-    // END PART 1: CALCULATING FIRST BALANCE BASED ON SALARY
-
-    // START PART 2: UPDATING BALANCE AFTER USER PURCHASE
-
-    const [userPurchases, setUserPurchases] = useState<UserPurchase[]>([]);
-    async function fetchUserPurchase() {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('user_purchases')
-        .select('*')
-        .eq('user_id', userId)
-      
-      if(error) {
-        console.log('error while fetching user purchase', error);
-      }
-      if(data) {
-        console.log('data user purchases: ', data);
-        setUserPurchases(data);
-        setLoading(false);
-      }
-    }
-
-    useEffect(() => {
-      if(userId) {
-        fetchUserPurchase();
-      }
-    }, [userId])
-    
-    useEffect(() => {
-      if(userId && dummyBalance && userPurchases && userPurchases.length > 0) {
-        console.log('ADA USER PURCHASES');
-
-        // Calculating remaining amount of balance
-        let finalAmount = dummyBalance;
-        userPurchases.forEach((userPurchase) => {
-          
-          // Subtracting balance with user purchases
-          console.log('dummy balance on user purchase: ', dummyBalance);
-
-          let amountPurchased = ((userPurchase.percentage_purchased/100) * dummyBalance)
-          finalAmount = finalAmount - amountPurchased;
-          console.log('amount purchased: ', amountPurchased);
-          console.log('change of final amount: ', finalAmount);
-          
-        });
-        console.log('FINAL amount: ', finalAmount);
-
-        setBalanceAfterPurchase(finalAmount);
-
-      }
-      else {
-        // console.log('TIDAK ADA USER PURCHASES');
-      }
-    }, [userPurchases, userId, dummyBalance])
-    
-    
-    // END PART 2: UPDATE BALANCE AFTER USER PURCHASE
+    const { dummyBalance, balanceAfterPurchase, userPurchases, fetchUserPurchase, purchaseLoading } = useGetUserBalance();
 
     // START PART 3: USER RESELL
     const [resellModal, setResellModal] = useState(false);
@@ -630,7 +528,7 @@ import { useGetUserPhone } from "../hooks/useGetUserPhone";
     // Check user phone number existence on db
     const { phoneNumber } = useGetUserPhone();
     
-    if(loading) {
+    if(loading || purchaseLoading) {
       return (
         <div className="h-screen flex justify-center items-center bg-slate-100">
           <span className="loading loading-spinner"></span>
