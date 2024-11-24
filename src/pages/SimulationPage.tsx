@@ -302,7 +302,7 @@ import { useGetUserBalance } from "../hooks/useGetUserBalance";
         .from('user_purchases')
         .delete()
         .eq('simulation_id', simulationId)
-        .eq('name_purchased', purchased.name_purchased);
+        .eq('id', purchased.id);
       
       if(response) {
         console.log('SUCCESS jual kembali', response);

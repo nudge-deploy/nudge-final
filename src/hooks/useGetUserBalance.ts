@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { useGetUser } from "./useGetUser";
 import supabase from "../database/supabaseClient";
 import { UserPurchase } from "../interface/SimulationInterface";
+import { useGetSimulation } from "./useGetSimulation";
 
 export const useGetUserBalance = () => {
 
   const { userId } = useGetUser();
+  const { simulationId } = useGetSimulation();
   const questionId = "6d06b8b9-c3fa-4309-832c-222f3cb674db";
   const [balance, setBalance] = useState<string>();
   const [dummyBalance, setDummyBalance] = useState<number>();
@@ -64,6 +66,7 @@ export const useGetUserBalance = () => {
       .from('user_purchases')
       .select('*')
       .eq('user_id', userId)
+      .eq('simulation_id', simulationId);
     
     if(error) {
       console.log('error while fetching user purchase', error);
@@ -76,10 +79,10 @@ export const useGetUserBalance = () => {
   }
 
   useEffect(() => {
-    if(userId) {
+    if(userId && simulationId) {
       fetchUserPurchase();
     }
-  }, [userId])
+  }, [userId, simulationId])
   
   useEffect(() => {
     if(userId && dummyBalance && userPurchases && userPurchases.length > 0) {

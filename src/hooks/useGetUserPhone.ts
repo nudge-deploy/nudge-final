@@ -6,7 +6,7 @@ export const useGetUserPhone = () => {
 
   const { userId } = useGetUser();
   const [phoneNumber, setPhoneNumber] = useState('');
-
+  
   useEffect(() => {
     
     const getUserPhone = async () => {

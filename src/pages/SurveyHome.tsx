@@ -23,19 +23,21 @@ export default function SurveyHome() {
   const handleUserStartSimulation = async () => {
     console.log('handle user start simul SURVEYHOME');
     if(userId) {
-      setStartSimulation(true);
       const { data, error } = await supabase
-        .from('user_finish_simulations')
-        .insert({
-          user_id: userId,
-          finished_simulation: false,
-        });
-      console.log('USER ID EXISTS.');
+      .from('user_finish_simulations')
+      .insert({
+        user_id: userId,
+        finished_simulation: false,
+      });
+
+
       if(error) {
         console.log('error while starting simulation SURVEYHOME', error)
       } else if(data) {
         console.log('SURVEYHOME user start simulation!! finished_simulation FALSE');
+      
       }
+      setStartSimulation(true);
     } else {
       console.log('user id doesnt exist');
     }

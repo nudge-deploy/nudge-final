@@ -4,7 +4,7 @@ import supabase from "../database/supabaseClient";
 
 export const useGetSimulation = () => {
   const { userId } = useGetUser();
-  const [simulationId, setSimulationId] = useState();
+  const [simulationId, setSimulationId] = useState('');
 
   useEffect(() => {
     
