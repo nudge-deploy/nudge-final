@@ -65,8 +65,8 @@ export const useGetUserBalance = () => {
     const { data, error } = await supabase
       .from('user_purchases')
       .select('*')
+      .eq('simulation_id', simulationId)
       .eq('user_id', userId)
-      .eq('simulation_id', simulationId);
     
     if(error) {
       console.log('error while fetching user purchase', error);
