@@ -27,7 +27,7 @@ export interface UserPageVisits {
 }
 
 export interface UserPurchase {
-  id: number;
+  id?: number;
   user_id: string;
   name_purchased: string;
   percentage_purchased: number;

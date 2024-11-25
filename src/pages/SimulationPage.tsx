@@ -372,58 +372,81 @@ import { useGetUserBalance } from "../hooks/useGetUserBalance";
     };
 
     const [loading, setLoading] = useState(false);
+
+    const checkDuplicateUserPhone = async (phoneNumber: string) => {
+      const { data, error } = await supabase
+        .from('user_finish_simulations')
+        .select('phone_number')
+        .eq('phone_number', phoneNumber)
+      
+      if(error) {
+        console.log('error checking phone num dupes', error);
+      } else if(data && data.length > 0) {
+        console.log('phone dupes exist', data);
+        return true;
+      }
+      return false;
+    }
+
     async function handleFinishSimulation(finishSimulation: boolean, phoneNumber: string) {
-      setLoading(true);
+      // setLoading(true);
       console.log('MASUK handle finish sim', simulationId);
 
+      const dupeChecked = await checkDuplicateUserPhone(phoneNumber);
+      console.log('dupe checked: ', dupeChecked);
+
       // Check if phone num is filled by the user
-      if(phoneNumber.length > 0) {
-        console.log('finished on if: ', finishSimulation);
-        const { error } = await supabase
-          .from('user_finish_simulations')
-          .update({
-            finished_simulation: finishSimulation,
-            phone_number: phoneNumber
-          }) 
-          .eq('id', simulationId)
-  
-        if(error) {
-          console.log('error while posting finish simulation SIMULPAGE: ', error.message);
-          if(error.message.includes('duplicate')) {
-            setLoading(false);
+      if(!dupeChecked) {
+        if(phoneNumber.length > 0) {
+          console.log('finished on if: ', finishSimulation);
+          const { error } = await supabase
+            .from('user_finish_simulations')
+            .update({
+              finished_simulation: finishSimulation,
+              phone_number: phoneNumber
+            }) 
+            .eq('id', simulationId)
+    
+          if(error) {
+            console.log('error while posting finish simulation SIMULPAGE: ', error.message);
+            if(error.message.includes('duplicate')) {
+              setLoading(false);
+              userSignOut();
+              setFinishSimulationModal(false);
+            }
+          } else {
+            console.log('MASUK handle UPDATE success');
             userSignOut();
             setFinishSimulationModal(false);
+            setLoading(false);
+            // userSignOut();
           }
         } else {
-          console.log('MASUK handle UPDATE success');
-          userSignOut();
-          setFinishSimulationModal(false);
-          setLoading(false);
-          // userSignOut();
+          console.log('finished on else: ', finishSimulation)
+          const { error } = await supabase
+            .from('user_finish_simulations')
+            .update({
+              finished_simulation: finishSimulation,
+            }) 
+            .eq('id', simulationId)
+    
+          if(error) {
+            console.log('error while posting finish simulation SIMULPAGE: ', error.message);
+            if(error.message.includes('duplicate')) {
+              setLoading(false);
+              userSignOut();
+              setFinishSimulationModal(false);
+            }
+          } else {
+            console.log('MASUK handle UPDATE success');
+            userSignOut();
+            setFinishSimulationModal(false);
+            setLoading(false);
+            // userSignOut();
+          }
         }
       } else {
-        console.log('finished on else: ', finishSimulation)
-        const { error } = await supabase
-          .from('user_finish_simulations')
-          .update({
-            finished_simulation: finishSimulation,
-          }) 
-          .eq('id', simulationId)
-  
-        if(error) {
-          console.log('error while posting finish simulation SIMULPAGE: ', error.message);
-          if(error.message.includes('duplicate')) {
-            setLoading(false);
-            userSignOut();
-            setFinishSimulationModal(false);
-          }
-        } else {
-          console.log('MASUK handle UPDATE success');
-          userSignOut();
-          setFinishSimulationModal(false);
-          setLoading(false);
-          // userSignOut();
-        }
+        alert('Phone number already exists. Please use other number.');
       }
     }
 
@@ -571,7 +594,8 @@ import { useGetUserBalance } from "../hooks/useGetUserBalance";
         <div className="flex flex-wrap gap-3 max-tablet:justify-center max-mobile:justify-center ">
           {
             userPurchases.length > 0 ?
-              userPurchases.map((purchased) => (
+              userPurchases
+                .map((purchased) => (
                 <div className="relative p-3 m-3 bg-primary w-36 h-44 rounded-xl hover:scale-105 transition">
                   <div className="text-white text-base font-semibold">{purchased.name_purchased}</div>
                   {

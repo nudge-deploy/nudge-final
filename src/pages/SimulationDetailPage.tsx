@@ -30,29 +30,113 @@ export default function SimulationDetailPage() {
   const [inputValue, setInputValue] = useState<number>();
 
   // handle user purchase
+
+  const checkDuplicatePurchased = async (name_purchased: string) => {
+    
+      const { data, error } = await supabase
+        .from('user_purchases')
+        .select('name_purchased')
+        .eq('user_id', userId)
+        .eq('simulation_id', simulationId)
+        .eq('name_purchased', name_purchased);
+      
+      if(error) {
+        console.log('error while checking duplicates purchased');
+      }
+
+      if(data!.length !== 0) {
+        console.log('duplicate products exist', data);
+        return true;
+      }
+      return false;
+
+  }
+
+  const fetchProductIdDupes = async (name_purchased: string) => {
+    const { data, error } = await supabase
+      .from('user_purchases')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('simulation_id', simulationId)
+      .eq('name_purchased', name_purchased);
+    
+    if(error) {
+      console.log('error select id: ', error);
+    }
+    if(data && data.length > 0) {
+      // console.log('data check dupes: ', data[0])
+      return data[0]
+    } else {
+      return 0;
+    }
+  }
+
   const handleUserPurchase = async ({ name_purchased, percentage_purchased } : UserPurchase) => {
     console.log('user beli');
     
-    if(name_purchased.includes('Kredit') || percentage_purchased <= remainingPercentage!) {
-      const { error } = await supabase
-        .from('user_purchases')
-        .insert({
-          user_id: userId,
-          name_purchased: name_purchased,
-          percentage_purchased: percentage_purchased,
-          simulation_id: simulationId,
-        });
-      
-      if(error) {
-        console.log('error while user purchase: ', error);
-      } else {
-        console.log('successful product purchase: ');
-        setModalSuccess(true);
-        setModalPurchase(false);
+    const checkDupes = await checkDuplicatePurchased(name_purchased)
+
+    if(checkDupes) {
+      console.log('dupes exists');
+      const dupes = await fetchProductIdDupes(name_purchased);
+      if(dupes) {
+        const dupesId = dupes.id;
+        const dupesPercentage = dupes.percentage_purchased;
+
+        console.log('dupes id: ', dupesId);
+        console.log('dupes percent: ', dupesPercentage);
+
+        if(name_purchased.includes('Kredit') || percentage_purchased <= remainingPercentage!) {
+          const { data, error } = await supabase
+            .from('user_purchases')
+            .update({
+              percentage_purchased: dupesPercentage + percentage_purchased
+            })
+            .eq('id', dupesId)
+            .select();
+          
+          if(error) {
+            console.log('error updating percentage of same prod');
+          }
+          if(data && data.length > 0) {
+            console.log('data response updating percent: ', data);
+            setModalSuccess(true);
+            setModalPurchase(false);
+          }
+        } else {
+          alert(`Anda hanya dapat membelanjakan maksimum ${remainingPercentage}% dari saldo Anda`);
+        }
       }
     } else {
-      alert(`Anda hanya dapat membelanjakan maksimum ${remainingPercentage}% dari saldo Anda`);
+      console.log('dupes dont exist');
+
+      if(name_purchased.includes('Kredit') || percentage_purchased <= remainingPercentage!) {
+        const { error } = await supabase
+          .from('user_purchases')
+          .insert({
+            user_id: userId,
+            name_purchased: name_purchased,
+            percentage_purchased: percentage_purchased,
+            simulation_id: simulationId,
+          });
+        
+        if(error) {
+          console.log('error while user purchase: ', error);
+        } else {
+          console.log('successful product purchase: ');
+          setModalSuccess(true);
+          setModalPurchase(false);
+        }
+      } else {
+        alert(`Anda hanya dapat membelanjakan maksimum ${remainingPercentage}% dari saldo Anda`);
+      }
+
     }
+
+    // if checkDupes is true, runs select percentage_purchased where product id
+    // sum percentage_purchased of the dupe with the inputted percentage_purchased
+    // update the percentage_purchased where product id
+
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
